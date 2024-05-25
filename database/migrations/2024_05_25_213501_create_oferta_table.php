@@ -13,6 +13,25 @@ return new class extends Migration
     {
         Schema::create('oferta', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('idArtista')
+            ->constrained('artista')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->foreignId('idTaller')
+            ->constrained('taller')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->date('fechaInicio');
+            $table->date('fechaFinal');
+            $table->float('costo');
+            $table->string('ubicacion');
+            $table->string('modalidad');
             $table->timestamps();
         });
     }

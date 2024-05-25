@@ -13,6 +13,21 @@ return new class extends Migration
     {
         Schema::create('matricula', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('idUsuario')
+            ->constrained('users')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->foreignId('idOferta')
+            ->constrained('oferta')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->date('fechaMatricula');
             $table->timestamps();
         });
     }

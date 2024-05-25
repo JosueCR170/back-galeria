@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('taller', function (Blueprint $table) {
             $table->id();
+            $table->string('nombre');
+            $table->string('descripcion');
+            $table->float('duracion');
+            $table->float('costo');
             $table->timestamps();
         });
     }
