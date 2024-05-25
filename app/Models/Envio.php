@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Factura extends Model
+class Envio extends Model
 {
     use HasFactory;
 
-    protected $table = "factura";
+    protected $table = "envios";
 
-    public function usuario(){
-        return $this->belongsTo(User::class, 'idUser');
+    public function factura(){
+        return $this->belongsTo(Factura::class, 'idFactura');
     }
 }

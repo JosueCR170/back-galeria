@@ -5,7 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class detalleFactura extends Model
+class DetalleFactura extends Model
 {
     use HasFactory;
+
+    protected $table = "detallefactura";
+
+    public function factura(){
+        return $this->belongsTo(Factura::class, 'idFactura');
+    }
+
+    public function obra(){
+        return $this->belongsTo(Obra::class, 'idObra');
+    }
 }
