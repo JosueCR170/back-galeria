@@ -13,6 +13,23 @@ return new class extends Migration
     {
         Schema::create('detalle_factura', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('idFactura')
+            ->constrained('factura')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->foreignId('idObra')
+            ->constrained('obra')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->float('precio');
+            $table->float('descuento');
+            $table->float('subtotal');
             $table->timestamps();
         });
     }

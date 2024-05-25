@@ -20,8 +20,17 @@ return new class extends Migration
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
             $table->string('tecnica');
+            $table->string('nombre');
+            $table->string('tamano');
+            $table->float('precio');
+            $table->string('disponibilidad');
+            $table->string('categoria');
+            $table->blob('imagen');
+            $table->date('fechaCreacion');
+            $table->date('fechaRegistro');
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE obra MODIFY COLUMN imagen MEDIUMBLOB');
     }
 
     /**
