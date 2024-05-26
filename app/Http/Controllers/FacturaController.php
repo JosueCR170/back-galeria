@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JwtAuth;
 use App\Helpers\JwtAuthArtista;
 use App\Helpers\JwtAuthUser;
 use App\Models\Factura;
@@ -12,7 +13,7 @@ class FacturaController
     //
     public function index(Request $request)
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
         $data = Factura::all();
         $response = array(
@@ -32,7 +33,7 @@ class FacturaController
 
     public function indexById(Request $request)
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
         
         $data = Factura::where('idUsuario', $idUsuario);
@@ -64,7 +65,7 @@ class FacturaController
 
     public function showWithDate(Request $request, $date)
     {
-        $jwtUser = new JwtAuthUser();
+        $jwtUser = new JwtAuth();
         $idUsuario = $jwtUser->checkToken($request->header('bearertoken'), true)->idUsuario;
         
         $data = Factura::where('idUsuario', $idUsuario)->where('date', $date);
@@ -85,7 +86,7 @@ class FacturaController
 
     public function store(Request $request)
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
 
         $data_input = $request->input('data', null);
@@ -131,7 +132,7 @@ class FacturaController
 
     public function update(Request $request, $id)
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
 
             $factura = Factura::find($id);
@@ -196,7 +197,7 @@ class FacturaController
 
     public function destroy(Request $request, $id)
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
             if (isset($id)) {
                 $deleted = Factura::where('id', $id)->delete();

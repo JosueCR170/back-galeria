@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use App\Helpers\JwtAuthUser;
+use App\Helpers\JwtAuth;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ApiAuthMiddlewareUser
+class ApiAuthMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,7 +16,7 @@ class ApiAuthMiddlewareUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $jwt=new JwtAuthUser();
+        $jwt=new JwtAuth();
         $token=$request->header('bearertoken');
         $logged=$jwt->checkToken($token);
         if($logged){

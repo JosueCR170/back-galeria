@@ -11,7 +11,7 @@ class UserController
 {
     public function index(Request $request)//listo
     {
-        $jwt = new JwtAuthUser();
+        $jwt = new JwtAuth();
         if (!$jwt->checkToken($request->header('bearertoken'), true)->permisoAdmin) {
             $response = array(
                 'status' => 406,
@@ -203,8 +203,8 @@ class UserController
         $isValid = \validator($data, $rules);
     
         if (!$isValid->fails()) {
-            $jwt = new JwtAuthUser();
-            $response = $jwt->getToken($data['email'], $data['password']);
+            $jwt = new JwtAuth();
+            $response = $jwt->getTokenUser($data['email'], $data['password']);
             return response()->json($response);
         } else {
             $response = array(
@@ -217,7 +217,7 @@ class UserController
     }
     
     public function getIdentity(Request $request){//listo
-        $jwt=new JwtAuthUser();
+        $jwt=new JwtAuth();
         $token=$request->header('bearertoken');
         if(isset($token)){
             $response=$jwt->checkToken($token,true);
