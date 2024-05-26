@@ -18,14 +18,14 @@ class UserController
 
             );
         } else {
-        $data=User::all();
-        $response=array(
-            "status"=>200,
-            "message"=>"Todos los registros de los usuarios",
-            "data"=>$data
-        );
-    }
-        return response()->json($response,200);
+            $data = User::all();
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de los usuarios",
+                "data" => $data
+            );
+        }
+        return response()->json($response, 200);
     }
 
     public function store(Request $request)
@@ -36,22 +36,21 @@ class UserController
             if ($data !== null) {
                 $data = array_map('trim', $data);
                 $rules = [
-                    'name' => 'required|alpha|max:30',
-                    'apellido' => 'required|alpha|max:40',
+                    'nombre' => 'required|string|max:80',
+                    'telefono' => 'numeric',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required|alpha_dash',
-                    'fechaNacimiento' => 'required|date',
-                    'permisoAdmin' => 'required|boolean'
+                    'nombreUsuario' => 'required|string|max:45',
                 ];
                 $validator = validator($data, $rules);
                 if (!$validator->fails()) {
                     $user = new User();
-                    $user->name = $data['name'];
-                    $user->apellido = $data['apellido'];
+                    $user->nombre = $data['nombre'];
+                    $user->telefono = $data['telefono'];
                     $user->email = $data['email'];
                     $user->password = hash('sha256', $data['password']);
-                    $user->fechaNacimiento = $data['fechaNacimiento'];
-                    $user->permisoAdmin = $data['permisoAdmin'];
+                    $user->nombreUsuario = $data['nombreUsuario'];
+                    $user->tipoUsuario = false;
                     $user->save();
                     $response = [
                         'status' => 201,
@@ -77,53 +76,72 @@ class UserController
                 'message' => 'No se encontró el objeto de datos (data)'
             ];
         }
-    
+
         // Devolver la respuesta JSON
         return response()->json($response, $response['status']);
     }
-    
-    public function show($id){//listo
-        $data=User::find($id);
-        if(is_object($data)){
-            $response=array(
-                'status'=>200,
-                'message'=>'Datos del usuario',
-                'user'=>$data
+
+    public function show($id)
+    {//listo
+        $data = User::find($id);
+        if (is_object($data)) {
+            $response = array(
+                'status' => 200,
+                'message' => 'Datos del usuario',
+                'user' => $data
             );
-        }else{
-            $response=array(
-                'status'=>404,
-                'message'=>'Recurso no encontrado'
+        } else {
+            $response = array(
+                'status' => 404,
+                'message' => 'Recurso no encontrado'
             );
         }
-        return response()->json($response,$response['status']);
+        return response()->json($response, $response['status']);
     }
 
-    public function destroy($id){
-        if(isset($id)){
-            $deleted=User::where('id',$id)->delete();
-            if($deleted)
-            {
-                $response=array(
-                    'status'=>200,
-                    'message'=>'Usuario eliminado'
-                );
-            }else{
-                $response=array(
-                    'status'=>400,
-                    'message'=>'No se pudo eliminar el recurso, compruebe que exista'
+    public function destroy(Request $request, $id)
+    {
+        $jwt = new JwtAuth();
+        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            if (isset($id)) {
+                $deleted = User::where('id', $id)->delete();
+                if ($deleted) {
+                    $response = array(
+                        'status' => 200,
+                        'message' => 'Usuario eliminado'
+                    );
+                } else {
+                    $response = array(
+                        'status' => 400,
+                        'message' => 'No se pudo eliminar el recurso, compruebe que exista'
+                    );
+                }
+            } else {
+                $response = array(
+                    'status' => 406,
+                    'message' => 'Falta el identificador del recurso a eliminar'
                 );
             }
-        }else{
-            $response=array(
-                'status'=>406,
-                'message'=>'Falta el identificador del recurso a eliminar'
+        } else {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+
             );
         }
-        return response()->json($response,$response['status']);
+        return response()->json($response, $response['status']);
     }
 
-    public function update(Request $request, $id) { 
+    public function update(Request $request, $id)
+    {
+        $isAdmin = false;
+        $jwt = new JwtAuth();
+        $sessionUser = $jwt->checkToken($request->header('bearertoken'), true);
+        if ($sessionUser->tipoUsuario) {
+            $isAdmin = $request['tipoUsuario'];
+        } else {
+            $id = $sessionUser->id;
+        }
         $user = User::find($id);
         if (!$user) {
             $response = [
@@ -132,10 +150,10 @@ class UserController
             ];
             return response()->json($response, $response['status']);
         }
-    
+
         $data_input = $request->input('data', null);
         $data_input = json_decode($data_input, true);
-    
+
         if (!$data_input) {
             $response = [
                 'status' => 400,
@@ -143,18 +161,16 @@ class UserController
             ];
             return response()->json($response, $response['status']);
         }
-    
+
         $rules = [
-            'name'=>'alpha|max:30',
-            'apellido'=>'alpha|max:40',
-            'email'=>'email|unique:users,email',
-            'password'=>'alpha_dash',
-            'fechaNacimiento'=>'date',
-            'permisoAdmin'=>'boolean'
+            'nombre' => 'string|max:80',
+            'telefono' => 'numeric',
+            'password' => 'alpha_dash',
+            'nombreUsuario' => 'string|max:45',
         ];
-    
+
         $validator = \validator($data_input, $rules);
-    
+
         if ($validator->fails()) {
             $response = [
                 'status' => 406,
@@ -163,47 +179,55 @@ class UserController
             ];
             return response()->json($response, $response['status']);
         }
-    
-        if(isset($data_input['name'])) { $user->name = $data_input['name']; }
-        if(isset($data_input['apellido'])) { $user->apellido = $data_input['apellido']; }
-        if(isset($data_input['email'])) { $user->email = $data_input['email']; }
-        if(isset($data_input['password'])) { $user->password = hash('sha256', $data_input['password']); }
-        if(isset($data_input['fechaNacimiento'])) { $user->fechaNacimiento = $data_input['fechaNacimiento']; }
-        if(isset($data_input['permisoAdmin'])) { $user->permisoAdmin = $data_input['permisoAdmin']; }
+
+        if (isset($data_input['nombre'])) {
+            $user->nombre = $data_input['nombre'];
+        }
+        if (isset($data_input['telefono'])) {
+            $user->telefono = $data_input['telefono'];
+        }
+        if (isset($data_input['password'])) {
+            $user->password = hash('sha256', $data_input['password']);
+        }
+        if (isset($data_input['nombreUsuario'])) {
+            $user->nombreUsuario = $data_input['nombreUsuario'];
+        }
+        $user->tipoUsuario = $isAdmin;
 
         $user->save();
-    
+
         $response = [
             'status' => 201,
             'message' => 'Usuario actualizado',
             'user' => $user
         ];
-    
+
         return response()->json($response, $response['status']);
     }
-    
-    public function login(Request $request){ //listo
+
+    public function login(Request $request)
+    { //listo
         $data_input = $request->input('data', null);
         $data = json_decode($data_input, true);
-    
-       
+
+
         if ($data !== null) {
             $data = array_map('trim', $data);
         } else {
-            
+
             $response = array(
                 'status' => 400,
                 'message' => 'No se proporcionaron datos válidos',
             );
             return response()->json($response, 400);
         }
-    
-        $rules = ['email' => 'required', 'password' => 'required'];
+
+        $rules = ['nombreUsuario' => 'required', 'password' => 'required'];
         $isValid = \validator($data, $rules);
-    
+
         if (!$isValid->fails()) {
             $jwt = new JwtAuth();
-            $response = $jwt->getTokenUser($data['email'], $data['password']);
+            $response = $jwt->getTokenUser($data['nombreUsuario'], $data['password']);
             return response()->json($response);
         } else {
             $response = array(
@@ -214,16 +238,17 @@ class UserController
             return response()->json($response, 406);
         }
     }
-    
-    public function getIdentity(Request $request){//listo
-        $jwt=new JwtAuth();
-        $token=$request->header('bearertoken');
-        if(isset($token)){
-            $response=$jwt->checkToken($token,true);
-        }else{
-            $response=array(
-                'status'=>404,
-                'message'=>'token (bearertoken) no encontrado',
+
+    public function getIdentity(Request $request)
+    {//listo
+        $jwt = new JwtAuth();
+        $token = $request->header('bearertoken');
+        if (isset($token)) {
+            $response = $jwt->checkToken($token, true);
+        } else {
+            $response = array(
+                'status' => 404,
+                'message' => 'token (bearertoken) no encontrado',
             );
         }
         return response()->json($response);

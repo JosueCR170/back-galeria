@@ -94,87 +94,108 @@ class ArtistaController
 
     public function update(Request $request, $id)
     {
-        $artista = Artista::find($id);
-        if (!$artista) {
-            $response = [
-                'status' => 404,
-                'message' => 'Artista no encontrado'
-            ];
-            return response()->json($response, $response['status']);
+        $jwt = new JwtAuth();
+        $authAccess = $jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario;
+        if ($authAccess === null) {
+            $id = $jwt->checkToken($request->header('bearertoken'), true)->id;
+            $authAccess = true;
         }
+        if ($authAccess) {
+            $artista = Artista::find($id);
+            if (!$artista) {
+                $response = [
+                    'status' => 404,
+                    'message' => 'Artista no encontrado'
+                ];
+                return response()->json($response, $response['status']);
+            }
 
-        $data_input = $request->input('data', null);
-        $data_input = json_decode($data_input, true);
+            $data_input = $request->input('data', null);
+            $data_input = json_decode($data_input, true);
 
-        if (!$data_input) {
-            $response = [
-                'status' => 400,
-                'message' => 'No se encontró el objeto data. No hay datos que modificar'
+            if (!$data_input) {
+                $response = [
+                    'status' => 400,
+                    'message' => 'No se encontró el objeto data. No hay datos que modificar'
+                ];
+                return response()->json($response, $response['status']);
+            }
+
+            $rules = [
+                'nombre' => 'string|max:80',
+                'password' => 'max:20',
+                'telefono' => 'max:11',
+                'nombreArtista' => 'unique:Artista|max:45',
             ];
-            return response()->json($response, $response['status']);
-        }
 
-        $rules = [
-            'nombre' => 'string|max:80',
-            'password' => 'max:20',
-            'telefono' => 'max:11',
-            'nombreArtista' => 'unique:Artista|max:45',
-        ];
+            $validator = \validator($data_input, $rules);
 
-        $validator = \validator($data_input, $rules);
+            if ($validator->fails()) {
+                $response = [
+                    'status' => 406,
+                    'message' => 'Datos inválidos',
+                    'error' => $validator->errors()
+                ];
+                return response()->json($response, $response['status']);
+            }
 
-        if ($validator->fails()) {
+            if (isset($data_input['nombre'])) {
+                $artista->nombre = $data_input['nombre'];
+            }
+            if (isset($data_input['password'])) {
+                $artista->password = hash('sha256', $data_input['password']);
+            }
+            if (isset($data_input['telefono'])) {
+                $artista->telefono = $data_input['telefono'];
+            }
+            if (isset($data_input['nombreArtista'])) {
+                $artista->nombreArtista = $data_input['nombreArtista'];
+            }
+
+            $artista->save();
+
             $response = [
+                'status' => 201,
+                'message' => 'Artista actualizado',
+                'Artista' => $artista
+            ];
+        } else {
+            $response = array(
                 'status' => 406,
-                'message' => 'Datos inválidos',
-                'error' => $validator->errors()
-            ];
-            return response()->json($response, $response['status']);
+                'menssage' => 'No tienes acceso al recurso'
+            );
         }
-
-        if (isset($data_input['nombre'])) {
-            $artista->nombre = $data_input['nombre'];
-        }
-        if (isset($data_input['password'])) {
-            $artista->password = hash('sha256', $data_input['password']);
-        }
-        if (isset($data_input['telefono'])) {
-            $artista->telefono = $data_input['telefono'];
-        }
-        if (isset($data_input['nombreArtista'])) {
-            $artista->nombreArtista = $data_input['nombreArtista'];
-        }
-
-        $artista->save();
-
-        $response = [
-            'status' => 201,
-            'message' => 'Artista actualizado',
-            'Artista' => $artista
-        ];
-
         return response()->json($response, $response['status']);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        if (isset($id)) {
-            $deleted = Artista::where('id', $id)->delete();
-            if ($deleted) {
-                $response = array(
-                    'status' => 200,
-                    'message' => 'Artista eliminado',
-                );
+        $jwt = new JwtAuth();
+        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            if (isset($id)) {
+                $deleted = Artista::where('id', $id)->delete();
+                if ($deleted) {
+                    $response = array(
+                        'status' => 200,
+                        'message' => 'Artista eliminado',
+                    );
+                } else {
+                    $response = array(
+                        'status' => 400,
+                        'message' => 'No se pudo eliminar el recurso, compruebe que exista'
+                    );
+                }
             } else {
                 $response = array(
-                    'status' => 400,
-                    'message' => 'No se pudo eliminar el recurso, compruebe que exista'
+                    'status' => 406,
+                    'message' => 'Falta el identificador del recurso a eliminar'
                 );
             }
         } else {
             $response = array(
                 'status' => 406,
-                'message' => 'Falta el identificador del recurso a eliminar'
+                'menssage' => 'No tienes permiso de administrador'
+
             );
         }
         return response()->json($response, $response['status']);
