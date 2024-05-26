@@ -47,9 +47,9 @@ class ArtistaController
             $data = json_decode($data_input, true);
             $data = array_map('trim', $data);
             $rules = [
-                'nombre' => 'required|alpha|max:80',
+                'nombre' => 'required|string|max:80',
                 'password' => 'required|max:20',
-                'telefono' => 'required|max:11',
+                'telefono' => 'numeric',
                 'correo' => 'required|email|unique:Artista|max:45',
                 'nombreArtista' => 'required|unique:Artista|max:45',
             ];

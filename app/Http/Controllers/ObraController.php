@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Obra;
 use Illuminate\Http\Request;
-use App\Helpers\JwtAuthArtista;
+use App\Helpers\JwtAuth;
+use Illuminate\Validation\Rule;
 
 class ObraController
 {
@@ -24,14 +25,15 @@ class ObraController
 
     public function store(Request $request)
     {
-        $jwt = new JwtAuthArtista();
-        if (!$jwt->checkToken($request->header('bearertoken'), true)->permisoAdmin) {
-            $response = array(
-                'status' => 406,
-                'menssage' => 'No tienes permiso de administrador'
-            );
-        } else {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
 
+        // var_dump($decodedToken);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+
+        if ($adminVerified || $artistaVerified!==null) {
+            
             $data_input = $request->input('data', null);
             $file = $request->file('file');
 
@@ -39,26 +41,42 @@ class ObraController
                 $data = json_decode($data_input, true);
                 $data = array_map('trim', $data);
 
-                $isValid = \Validator::make($data, [
-                    'idPelicula' => 'required|exists:peliculas,id',
-                    'descripcion' => 'required',
+                $tecnica=Obra::getTecnica();
+                $isValid = \Validator::make(array_merge($data, ['file' => $file]), [
+                    'idArtista' => 'required|exists:artista,id',
+                    'tecnica' => ['required', Rule::in($tecnica)],
+                    'nombre' => 'required',
+                    'tamano' => 'required',
+                    'precio' => 'required',
+                    'disponibilidad' => 'required',
+                    'categoria' => 'required',
+                    'file' => 'required|image',
+                    'fechaCreacion' => 'required',
+                    'fechaRegistro' => 'required'
                 ]);
 
                 if (!$isValid->fails()) {
-                    $imagen = new Imagen();
-                    $filename = \Str::uuid() . "." . $file->getClientOriginalExtension();
+                    // Leer el contenido del archivo
+                    $imageContent = base64_encode(file_get_contents($file));
 
-                    \Storage::disk('peliculas')->put($filename, \File::get($file));
-
-                    $imagen->idPelicula = $data['idPelicula'];
-                    $imagen->descripcion = $data['descripcion'];
-                    $imagen->imagen = $filename;
-                    $imagen->save();
+                    // Crear y guardar la obra
+                    $obra = new Obra();
+                    $obra->idArtista = $data['idArtista'];
+                    $obra->tecnica = $data['tecnica'];
+                    $obra->nombre = $data['nombre'];
+                    $obra->tamano = $data['tamano'];
+                    $obra->precio = $data['precio'];
+                    $obra->disponibilidad = $data['disponibilidad'];
+                    $obra->categoria = $data['categoria'];
+                    $obra->imagen = $imageContent; // Guardar la imagen como blob
+                    $obra->fechaCreacion = $data['fechaCreacion'];
+                    $obra->fechaRegistro = $data['fechaRegistro'];
+                    $obra->save();
 
                     $response = [
                         'status' => 201,
-                        'message' => 'Imagen guardada',
-                        'filename' => $filename
+                        'message' => 'Obra guardada exitosamente',
+                        'obra' => $obra
                     ];
                 } else {
                     $response = [
@@ -73,6 +91,12 @@ class ObraController
                     'message' => 'No se encontraron todos los datos necesarios'
                 ];
             }
+        } else {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+            );
+
         }
         return response()->json($response, $response['status']);
     }

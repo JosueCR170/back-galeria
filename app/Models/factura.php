@@ -14,4 +14,8 @@ class Factura extends Model
     public function usuario(){
         return $this->belongsTo(User::class, 'id');
     }
+
+    public function obra(){
+    return $this->belongsTo(Obra::class, 'idObra');       
+    }
 }
