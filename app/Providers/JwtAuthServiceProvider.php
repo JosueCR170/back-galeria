@@ -12,9 +12,7 @@ class JwtAuthServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        
-        require_once app_path().'\Helpers\JwtAuthArtista.php';
-        require_once app_path().'\Helpers\JwtAuthUser.php';
+        require_once app_path().'\Helpers\JwtAuth.php';
     }
 
     /**
