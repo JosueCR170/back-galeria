@@ -57,7 +57,7 @@ class ArtistaController
             $rules = [
                 'nombre' => 'required|string|max:80',
                 'password' => 'required|max:20',
-                'telefono' => 'max:11',
+                'telefono' => 'numeric',
                 'correo' => 'required|email|unique:Artista|max:45',
                 'nombreArtista' => 'required|unique:Artista|max:45',
             ];

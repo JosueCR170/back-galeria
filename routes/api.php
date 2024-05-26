@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ObraController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Middleware\ApiAuthMiddleware;
 
 Route::prefix('v1')->group(
     function(){
@@ -12,6 +15,10 @@ Route::prefix('v1')->group(
 
         Route::post('/user/store',[UserController::class,'store']);
         Route::post('/user/login',[UserController::class,'login']);
+
+        Route::post('/obra',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);
+
+        
     }
 );
 

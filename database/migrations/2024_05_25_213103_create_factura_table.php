@@ -20,6 +20,15 @@ return new class extends Migration
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
             //-------------------------
+
+            $table->foreignId('idObra')
+            ->constrained('obra')
+            ->nullable()
+            ->unique()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+            
             $table->date('fecha');
             $table->float('total');
             $table->float('subtotal');
