@@ -137,7 +137,7 @@ class ArtistaController
         return response()->json($response, $response['status']);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
             if (isset($id)) {
                 $deleted = Artista::where('id', $id)->delete();

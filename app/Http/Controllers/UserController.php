@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JwtAuthUser;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Helpers\JwtAuth;
@@ -10,7 +11,7 @@ class UserController
 {
     public function index(Request $request)//listo
     {
-        $jwt = new JwtAuth();
+        $jwt = new JwtAuthUser();
         if (!$jwt->checkToken($request->header('bearertoken'), true)->permisoAdmin) {
             $response = array(
                 'status' => 406,
@@ -202,7 +203,7 @@ class UserController
         $isValid = \validator($data, $rules);
     
         if (!$isValid->fails()) {
-            $jwt = new JwtAuth();
+            $jwt = new JwtAuthUser();
             $response = $jwt->getToken($data['email'], $data['password']);
             return response()->json($response);
         } else {
@@ -216,7 +217,7 @@ class UserController
     }
     
     public function getIdentity(Request $request){//listo
-        $jwt=new JwtAuth();
+        $jwt=new JwtAuthUser();
         $token=$request->header('bearertoken');
         if(isset($token)){
             $response=$jwt->checkToken($token,true);
