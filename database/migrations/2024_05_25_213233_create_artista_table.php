@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 80);
             $table->string('password');
-            $table->integer('telefono');
-            $table->string('correo');
-            $table->string('nombreArtista');
+            $table->integer('telefono')->nullable();
+            $table->string('correo')->unique();
+            $table->string('nombreArtista')->unique();
             $table->timestamps();
         });
     }
