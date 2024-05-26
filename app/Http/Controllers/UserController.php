@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\JwtAuthUser;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Helpers\JwtAuth;

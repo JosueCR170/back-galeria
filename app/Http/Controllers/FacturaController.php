@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
-use App\Helpers\JwtAuthArtista;
-use App\Helpers\JwtAuthUser;
 use App\Models\Factura;
 use Illuminate\Http\Request;
 
@@ -15,19 +13,19 @@ class FacturaController
     {
         $jwt = new JwtAuth();
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-        $data = Factura::all();
-        $response = array(
-            "status" => 200,
-            "message" => "Todos los registros de facturas",
-            "data" => $data
-        );
-    } else {
-        $response = array(
-            'status' => 406,
-            'menssage' => 'No tienes permiso de administrador'
+            $data = Factura::all();
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de facturas",
+                "data" => $data
+            );
+        } else {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
 
-        );
-    }
+            );
+        }
         return response()->json($response, 200);
     }
 
@@ -35,7 +33,7 @@ class FacturaController
     {
         $jwt = new JwtAuth();
         $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
-        
+
         $data = Factura::where('idUsuario', $idUsuario);
         $response = array(
             "status" => 200,
@@ -65,8 +63,8 @@ class FacturaController
 
     public function showWithDate(Request $request, $date)
     {
-        $jwtUser = new JwtAuth();
-        $idUsuario = $jwtUser->checkToken($request->header('bearertoken'), true)->idUsuario;
+        $jwt = new JwtAuth();
+        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
         
         $data = Factura::where('idUsuario', $idUsuario)->where('date', $date);
         if (is_object($data)) {
@@ -87,7 +85,11 @@ class FacturaController
     public function store(Request $request)
     {
         $jwt = new JwtAuth();
-        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
+        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            $idUsuario = $request['idUsuario'];
+        } else {
+            $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
+        }
 
         $data_input = $request->input('data', null);
         if ($data_input) {
@@ -103,7 +105,7 @@ class FacturaController
             if (!$isValid->fails()) {
                 $factura = new Factura();
                 $factura->fecha = $data['fecha'];
-                $factura->total = hash('sha256', $data['total']);
+                $factura->total = $data['total'];
                 $factura->subtotal = $data['subtotal'];
                 $factura->descuento = $data['descuento'];
                 $factura->idUsuario = $idUsuario;
@@ -156,7 +158,7 @@ class FacturaController
             }
 
             $rules = [
-                'fecha' => 'required|date',
+                'fecha' => 'date',
                 // 'total'=>'required',
                 // 'subtotal'=>'required',
                 // 'descuento'=>'required',
@@ -173,10 +175,18 @@ class FacturaController
                 return response()->json($response, $response['status']);
             }
 
-            if (isset($data_input['fecha'])) { $factura->fecha = $data_input['fecha']; }
-            if (isset($data_input['total'])) { $factura->total = $data_input['total']; }
-            if (isset($data_input['subtotal'])) { $factura->subtotal = $data_input['subtotal']; }
-            if (isset($data_input['descuento'])) { $factura->descuento = $data_input['descuento']; }
+            if (isset($data_input['fecha'])) {
+                $factura->fecha = $data_input['fecha'];
+            }
+            if (isset($data_input['total'])) {
+                $factura->total = $data_input['total'];
+            }
+            if (isset($data_input['subtotal'])) {
+                $factura->subtotal = $data_input['subtotal'];
+            }
+            if (isset($data_input['descuento'])) {
+                $factura->descuento = $data_input['descuento'];
+            }
 
             $factura->save();
 

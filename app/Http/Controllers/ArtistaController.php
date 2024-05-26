@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
-use App\Helpers\JwtAuthArtista;
 use App\Models\Artista;
 use Illuminate\Http\Request;
 
@@ -22,19 +21,28 @@ class ArtistaController
         return response()->json($response, 200);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $data = Artista::find($id);
-        if (is_object($data)) {
-            $response = array(
-                'status' => 200,
-                'message' => 'Datos del Artista',
-                'Artista' => $data
-            );
+        $jwt = new JwtAuth();
+        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            $data = Artista::find($id);
+            if (is_object($data)) {
+                $response = array(
+                    'status' => 200,
+                    'message' => 'Datos del Artista',
+                    'Artista' => $data
+                );
+            } else {
+                $response = array(
+                    'status' => 404,
+                    'message' => 'Recurso no encontrado'
+                );
+            }
         } else {
             $response = array(
-                'status' => 404,
-                'message' => 'Recurso no encontrado'
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+
             );
         }
         return response()->json($response, $response['status']);
@@ -47,9 +55,9 @@ class ArtistaController
             $data = json_decode($data_input, true);
             $data = array_map('trim', $data);
             $rules = [
-                'nombre' => 'required|alpha|max:80',
+                'nombre' => 'required|string|max:80',
                 'password' => 'required|max:20',
-                'telefono' => 'required|max:11',
+                'telefono' => 'max:11',
                 'correo' => 'required|email|unique:Artista|max:45',
                 'nombreArtista' => 'required|unique:Artista|max:45',
             ];
@@ -107,7 +115,7 @@ class ArtistaController
         }
 
         $rules = [
-            'nombre' => 'alpha|max:80',
+            'nombre' => 'string|max:80',
             'password' => 'max:20',
             'telefono' => 'max:11',
             'nombreArtista' => 'unique:Artista|max:45',

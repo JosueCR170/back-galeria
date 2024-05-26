@@ -19,8 +19,6 @@ class JwtAuth
     public function getTokenUser($nombreUsuario, $password)
     {
         $user = User::where(['nombreUsuario' => $nombreUsuario, 'password' => hash('sha256', $password)])->first();
-        $artista = Artista::where(['nombreArtista' => $nombreUsuario, 'password' => hash('sha256', $password)])->first();
-        var_dump($artista);
         if (is_object($user)) {
             $token = array(
                 'iss' => $user->id,
