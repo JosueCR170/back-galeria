@@ -16,7 +16,7 @@ Route::prefix('v1')->group(
         Route::post('/user/store',[UserController::class,'store']);
         Route::post('/user/login',[UserController::class,'login']);
 
-        Route::post('/obra',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);
+        Route::post('/obra',[ObraController::class,'store2'])->middleware(ApiAuthMiddleware::class);
 
         
     }

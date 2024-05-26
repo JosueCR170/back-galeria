@@ -198,12 +198,12 @@ class UserController
             return response()->json($response, 400);
         }
     
-        $rules = ['email' => 'required', 'password' => 'required'];
+        $rules = ['nombreUsuario' => 'required', 'password' => 'required'];
         $isValid = \validator($data, $rules);
     
         if (!$isValid->fails()) {
             $jwt = new JwtAuth();
-            $response = $jwt->getTokenUser($data['email'], $data['password']);
+            $response = $jwt->getTokenUser($data['nombreUsuario'], $data['password']);
             return response()->json($response);
         } else {
             $response = array(

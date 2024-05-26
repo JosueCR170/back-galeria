@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('tamano');
             $table->float('precio');
-            $table->string('disponibilidad');
+            $table->boolean('disponibilidad');
             $table->string('categoria');
             $table->binary('imagen');
             $table->date('fechaCreacion');

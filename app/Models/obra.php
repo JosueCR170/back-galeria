@@ -30,7 +30,25 @@ class Obra extends Model
         'Escultura en bronce'
     ];
 
+    protected static $categorias = [
+        'Cubismo',
+        'Impresionismo',
+        'Expresionismo',
+        'Realismo',
+        'Surrealismo',
+        'Abstracto',
+        'Renacimiento',
+        'Barroco',
+        'Rococó',
+        'Romanticismo',
+        'Neoclasicismo',
+        'Modernismo',
+        'Arte Pop',
+        'Arte Naïf'
+    ];
+
     public static function getTecnica(){return self::$tecnicasArte;}
+    public static function getCategoria(){return self::$categorias;}
     
     public function artista(){
         return $this->belongsTo(Artista::class, 'id');
