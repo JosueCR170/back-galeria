@@ -12,6 +12,6 @@ class Envio extends Model
     protected $table = "envios";
 
     public function factura(){
-        return $this->belongsTo(Factura::class, 'idFactura');
+        return $this->belongsTo(Factura::class, 'id');
     }
 }

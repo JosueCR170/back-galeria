@@ -12,10 +12,10 @@ class Oferta extends Model
     protected $table = "oferta";
 
     public function artista(){
-        return $this->belongsTo(Artista::class, 'idArtista');
+        return $this->belongsTo(Artista::class, 'id');
     }
 
     public function taller(){
-        return $this->belongsTo(Taller::class, 'idTaller');
+        return $this->belongsTo(Taller::class, 'id');
     }
 }

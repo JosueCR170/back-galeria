@@ -33,6 +33,6 @@ class Obra extends Model
     public static function getTecnica(){return self::$tecnicasArte;}
     
     public function artista(){
-        return $this->belongsTo(Artista::class, 'idArtista');
+        return $this->belongsTo(Artista::class, 'id');
     }
 }

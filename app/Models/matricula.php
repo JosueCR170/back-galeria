@@ -12,10 +12,10 @@ class Matricula extends Model
     protected $table = "matricula";
 
     public function usuario(){
-        return $this->belongsTo(User::class, 'idUsuario');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function oferta(){
-        return $this->belongsTo(Oferta::class, 'idOferta');
+        return $this->belongsTo(Oferta::class, 'id');
     }
 }

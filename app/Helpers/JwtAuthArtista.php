@@ -5,26 +5,22 @@ namespace App\Helpers;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
-use App\Models\User;
+use App\Models\Artista;
 
-class JwtAuth{
+class JwtAuthArtista{
     private $key;
     function __construct(){
         $this->key="aswqdfewqeddafe23ewresa";
     }
-    public function getToken($email, $password){
-        $pass=hash('sha256',$password);
-        //var_dump($pass);
-        $user=User::where(['email'=>$email, 'password'=> hash('sha256',$password)])->first();
-        //var_dump($user);
-        if(is_object($user)){
+    public function getToken($correo, $password){
+        $artista=Artista::where(['correo'=>$correo, 'password'=> hash('sha256',$password)])->first();
+        if(is_object($artista)){
             $token=array(
-                'iss'=>$user->id,
-                'email'=>$user->email,
-                'name'=>$user->name,
-                'apellido'=>$user->apellido,
-                'fechaNacimiento'=>$user->fechaNacimiento,
-                'permisoAdmin'=>$user->permisoAdmin,
+                'iss'=>$artista->id,
+                'nombre'=>$artista->nombre,
+                'telefono'=>$artista->telefono,
+                'correo'=>$artista->correo,
+                'nombreArtista'=>$artista->nombreArtista,
                 'iat'=>time(),
                 'exp'=>time()+(10000)
             );

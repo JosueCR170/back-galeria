@@ -12,10 +12,10 @@ class DetalleFactura extends Model
     protected $table = "detallefactura";
 
     public function factura(){
-        return $this->belongsTo(Factura::class, 'idFactura');
+        return $this->belongsTo(Factura::class, 'id');
     }
 
     public function obra(){
-        return $this->belongsTo(Obra::class, 'idObra');
+        return $this->belongsTo(Obra::class, 'id');
     }
 }

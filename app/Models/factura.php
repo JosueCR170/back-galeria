@@ -12,6 +12,6 @@ class Factura extends Model
     protected $table = "factura";
 
     public function usuario(){
-        return $this->belongsTo(User::class, 'idUser');
+        return $this->belongsTo(User::class, 'id');
     }
 }

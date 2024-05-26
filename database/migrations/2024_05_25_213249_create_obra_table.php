@@ -25,7 +25,7 @@ return new class extends Migration
             $table->float('precio');
             $table->string('disponibilidad');
             $table->string('categoria');
-            $table->blob('imagen');
+            $table->binary('imagen');
             $table->date('fechaCreacion');
             $table->date('fechaRegistro');
             $table->timestamps();
