@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Obra;
 use Illuminate\Http\Request;
 use App\Helpers\JwtAuthArtista;
-use App\Models\Obra;
 
 class ObraController
 {
     //
+
     public function index()
     {
         $data = Obra::all();
@@ -199,4 +200,5 @@ class ObraController
             return response()->json($response,$response['status']);
 
     }
+
 }
