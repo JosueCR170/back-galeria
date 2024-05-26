@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JwtAuthArtista;
 use App\Helpers\JwtAuthUser;
 use App\Models\Factura;
 use Illuminate\Http\Request;
@@ -9,9 +10,32 @@ use Illuminate\Http\Request;
 class FacturaController
 {
     //
-    public function index()
+    public function index(Request $request)
     {
+        $jwt = new JwtAuthUser();
+        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
         $data = Factura::all();
+        $response = array(
+            "status" => 200,
+            "message" => "Todos los registros de facturas",
+            "data" => $data
+        );
+    } else {
+        $response = array(
+            'status' => 406,
+            'menssage' => 'No tienes permiso de administrador'
+
+        );
+    }
+        return response()->json($response, 200);
+    }
+
+    public function indexById(Request $request)
+    {
+        $jwt = new JwtAuthUser();
+        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
+        
+        $data = Factura::where('idUsuario', $idUsuario);
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de facturas",
@@ -28,6 +52,27 @@ class FacturaController
                 'status' => 200,
                 'message' => 'Datos de la factura',
                 'Artista' => $data
+            );
+        } else {
+            $response = array(
+                'status' => 404,
+                'message' => 'Recurso no encontrado'
+            );
+        }
+        return response()->json($response, $response['status']);
+    }
+
+    public function showWithDate(Request $request, $date)
+    {
+        $jwtUser = new JwtAuthUser();
+        $idUsuario = $jwtUser->checkToken($request->header('bearertoken'), true)->idUsuario;
+        
+        $data = Factura::where('idUsuario', $idUsuario)->where('date', $date);
+        if (is_object($data)) {
+            $response = array(
+                'status' => 200,
+                'message' => 'Datos de las facturas',
+                'data' => $data
             );
         } else {
             $response = array(
