@@ -12,8 +12,9 @@ class JwtAuthUser{
     function __construct(){
         $this->key="aswqdfewqeddafe23ewresa";
     }
-    public function getToken($usuario, $password){
-        $user=User::where(['usuario'=>$usuario, 'password'=> hash('sha256',$password)])->first();
+
+    public function getToken($nombreUsuario, $password){
+        $user=User::where(['nombreUsuario'=>$nombreUsuario, 'password'=> hash('sha256',$password)])->first();
         if(is_object($user)){
             $token=array(
                 'iss'=>$user->id,
