@@ -95,7 +95,7 @@ class ArtistaController
         if (($artistaVerified !==null && $decodedToken->iss===$id) || ($adminVerified!==null)) {
             $authAccess = true;
         }
-
+        
         if ($authAccess) {
             $artista = Artista::find($id);
             if (!$artista) {
