@@ -14,7 +14,9 @@ class FacturaController
     public function index(Request $request)
     {
         $jwt = new JwtAuth();
-        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if (!$artistaVerified && $jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
             $data = Factura::all();
             $response = array(
                 "status" => 200,
@@ -31,55 +33,118 @@ class FacturaController
         return response()->json($response, 200);
     }
 
-    public function indexById(Request $request)
+    public function indexByUserId(Request $request, $id)
     {
         $jwt = new JwtAuth();
-        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-        $data = Factura::where('idUsuario', $idUsuario);
-        $response = array(
-            "status" => 200,
-            "message" => "Todos los registros de facturas",
-            "data" => $data
-        );
+        if ($artistaVerified) {
+            $response = array(
+                "status" => 200,
+                "message" => "No tienes acceso al recurso"
+            );
+        } else {
+            if (!$decodedToken->tipoUsuario) {
+                $id = $decodedToken->iss;
+            }
+
+            $data = Factura::where('idUsuario', $id)->get();
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de facturas",
+                "data" => $data
+            );
+        }
         return response()->json($response, 200);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $data = Factura::find($id);
-        if (is_object($data)) {
-            $response = array(
-                'status' => 200,
-                'message' => 'Datos de la factura',
-                'Artista' => $data
-            );
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $UserVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        if ($UserVerified) {
+            $data = Factura::find($id);
+            if (is_object($data)) {
+                $response = array(
+                    'status' => 200,
+                    'message' => 'Datos de la factura',
+                    'Artista' => $data
+                );
+            } else {
+                $response = array(
+                    'status' => 404,
+                    'message' => 'Recurso no encontrado'
+                );
+            }
         } else {
             $response = array(
-                'status' => 404,
-                'message' => 'Recurso no encontrado'
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador'
             );
         }
         return response()->json($response, $response['status']);
     }
 
-    public function showWithDate(Request $request, $date)
+    public function showWithDate(Request $request)
     {
         $jwt = new JwtAuth();
-        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
-
-        $data = Factura::where('idUsuario', $idUsuario)->where('date', $date);
-        if (is_object($data)) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($artistaVerified) {
             $response = array(
-                'status' => 200,
-                'message' => 'Datos de las facturas',
-                'data' => $data
+                "status" => 200,
+                "message" => "No tienes acceso al recurso"
             );
         } else {
-            $response = array(
-                'status' => 404,
-                'message' => 'Recurso no encontrado'
-            );
+            $data_input = $request->input('data', null);
+            if ($data_input) {
+                $data = json_decode($data_input, true);
+                $data = array_map('trim', $data);
+                $rules = [
+                    'fecha' => 'required|date',
+                ];
+                $isValid = \validator($data, $rules);
+                if (!$isValid->fails()) {
+                    if ($decodedToken->tipoUsuario) {
+                        $idUsuario = $data['idUsuario'];
+                    } else {
+                        $idUsuario = $decodedToken->iss;
+                    }
+                    $data = Factura::where('idUsuario', $idUsuario)->where('fecha', $data['fecha'])->get();
+                    if (!$data->isEmpty()) {
+                        if (is_object($data)) {
+                            $response = array(
+                                'status' => 200,
+                                'message' => 'Datos de las facturas',
+                                'data' => $data
+                            );
+                        } else {
+                            $response = array(
+                                'status' => 404,
+                                'message' => 'Recurso no encontrado'
+                            );
+                        }
+                    } else {
+                        $response = array(
+                            'status' => 404,
+                            'message' => 'No existen facturas registradas en esa fecha'
+                        );
+                    }
+                } else {
+                    $response = array(
+                        'status' => 406,
+                        'message' => 'Datos inválidos',
+                        'errors' => $isValid->errors()
+                    );
+                }
+            } else {
+                $response = array(
+                    'status' => 400,
+                    'message' => 'No se encontró el objeto data'
+                );
+            }
         }
         return response()->json($response, $response['status']);
     }
@@ -215,7 +280,11 @@ class FacturaController
     public function destroy(Request $request, $id)
     {
         $jwt = new JwtAuth();
-        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+
+
+        if (!$artistaVerified && $jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
             if (isset($id)) {
                 $deleted = Factura::where('id', $id)->delete();
                 if ($deleted) {

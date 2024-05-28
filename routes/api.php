@@ -36,7 +36,13 @@ Route::prefix('v1')->group(
         Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
         Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
         //Factura
-        Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);
+        Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
+        Route::get('/factura',[FacturaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/factura/{id}',[FacturaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/factura/user/{id}',[FacturaController::class,'indexByUserId'])->middleware(ApiAuthMiddleware::class);//admin-user -
+        Route::post('/factura/showwithdate',[FacturaController::class,'showWithDate'])->middleware(ApiAuthMiddleware::class);//admin-user -
+        Route::delete('/factura/{id}',[FacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
+        
         //Envio
 
         
