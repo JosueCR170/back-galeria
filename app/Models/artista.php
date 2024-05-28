@@ -8,14 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Artista extends Model
 {
     use HasFactory;
-
-    protected $table = "artista";
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'artista';
+   
     protected $hidden = [
         'password',
         'remember_token',

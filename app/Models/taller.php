@@ -9,5 +9,5 @@ class Taller extends Model
 {
     use HasFactory;
 
-    protected $table = "taller";
+    protected $table = "talleres";
 }

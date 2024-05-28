@@ -9,7 +9,7 @@ class Factura extends Model
 {
     use HasFactory;
 
-    protected $table = "factura";
+    protected $table = "facturas";
 
     public function usuario(){
         return $this->belongsTo(User::class, 'id');

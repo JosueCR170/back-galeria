@@ -9,7 +9,7 @@ class Oferta extends Model
 {
     use HasFactory;
     
-    protected $table = "oferta";
+    protected $table = "ofertas";
 
     public function artista(){
         return $this->belongsTo(Artista::class, 'id');

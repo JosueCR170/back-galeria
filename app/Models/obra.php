@@ -9,7 +9,7 @@ class Obra extends Model
 {
     use HasFactory;
 
-    protected $table = "obra";
+    protected $table = "obras";
 
     protected static $tecnicasArte = [
         'Óleo sobre lienzo',

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('envios', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idFactura')
-            ->constrained('factura')
+            ->constrained('facturas')
             ->nullable()
             //quitarlo
             ->cascadeOnUpdate()

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('obra', function (Blueprint $table) {
+        Schema::create('ofertas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idArtista')
             ->constrained('artista')
@@ -19,18 +19,21 @@ return new class extends Migration
             //quitarlo
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
-            $table->string('tecnica');
-            $table->string('nombre');
-            $table->string('tamano');
-            $table->float('precio');
-            $table->boolean('disponibilidad');
-            $table->string('categoria');
-            $table->binary('imagen');
-            $table->date('fechaCreacion');
-            $table->date('fechaRegistro');
+
+            $table->foreignId('idTaller')
+            ->constrained('talleres')
+            ->nullable()
+            //quitarlo
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
+
+            $table->date('fechaInicio');
+            $table->date('fechaFinal');
+            $table->float('costo');
+            $table->string('ubicacion');
+            $table->string('modalidad');
             $table->timestamps();
         });
-        DB::statement('ALTER TABLE obra MODIFY COLUMN imagen MEDIUMBLOB');
     }
 
     /**
@@ -38,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('obra');
+        Schema::dropIfExists('ofertas');
     }
 };

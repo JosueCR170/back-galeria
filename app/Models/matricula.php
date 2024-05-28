@@ -9,7 +9,7 @@ class Matricula extends Model
 {
     use HasFactory;
 
-    protected $table = "matricula";
+    protected $table = "matriculas";
 
     public function usuario(){
         return $this->belongsTo(User::class, 'id');
