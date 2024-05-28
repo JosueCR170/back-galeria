@@ -51,7 +51,7 @@ class Obra extends Model
     public static function getCategoria(){return self::$categorias;}
     
     public function artista(){
-        return $this->belongsTo(Artista::class, 'id');
+        return $this->belongsTo(Artista::class, 'idArtista');
     }
 
     public function factura(){

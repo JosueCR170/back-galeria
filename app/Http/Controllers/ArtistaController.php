@@ -85,18 +85,14 @@ class ArtistaController
 
     public function update(Request $request, $id)
     {
-        $authAccess=false;
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-
-        if (($artistaVerified !==null && $decodedToken->iss===$id) || ($adminVerified!==null)) {
-            $authAccess = true;
-        }
-        
-        if ($authAccess) {
+        // var_dump($decodedToken);
+        if (($artistaVerified !==null && $decodedToken->iss==$id) || ($adminVerified!=null)) {
+         
             $artista = Artista::find($id);
             if (!$artista) {
                 $response = [
@@ -168,7 +164,10 @@ class ArtistaController
     public function destroy(Request $request, $id)
     {
         $jwt = new JwtAuth();
-        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        
+        if ($adminVerified) {
             if (isset($id)) {
                 $deleted = Artista::where('id', $id)->delete();
                 if ($deleted) {
