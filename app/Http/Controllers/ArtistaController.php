@@ -231,7 +231,6 @@ class ArtistaController
                 'message' => 'Token (bearertoken) no encontrado',
             );
         }
-        //var_dump(response()->json($response));
         return response()->json($response);
     }
 }

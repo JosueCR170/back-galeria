@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ObraController;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ Route::prefix('v1')->group(
         //Obra
         
         //Factura
-
+        Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);
         //Envio
 
         Route::post('/obra',[ObraController::class,'store2'])->middleware(ApiAuthMiddleware::class);
