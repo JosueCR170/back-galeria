@@ -25,17 +25,20 @@ Route::prefix('v1')->group(
         Route::get('/artista/getIdentity',[ArtistaController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//-
         Route::get('/artista/{id}',[ArtistaController::class,'show']);//-
         Route::get('/artista',[ArtistaController::class,'index']);//-
-        Route::put('/artista/{id}',[ArtistaController::class,'update'])->middleware(ApiAuthMiddleware::class);
-        Route::delete('/artista/{id}',[ArtistaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);
+        Route::put('/artista/{id}',[ArtistaController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
+        Route::delete('/artista/{id}',[ArtistaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
         
         //Obra
-        
+        Route::get('/obra',[ObraController::class,'index']);//-
+        Route::get('/obra/{id}',[ObraController::class,'show']);//-
+        Route::post('/obra/store',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);//-
+        Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
+        Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
         //Factura
 
         //Envio
 
-        Route::post('/obra',[ObraController::class,'store2'])->middleware(ApiAuthMiddleware::class);
-        Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);
+        
 
         
     }
