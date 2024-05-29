@@ -11,10 +11,13 @@ use Illuminate\Http\Request;
 class EnvioController
 {
     //
-    public function index(Request $request)
+    public function index(Request $request) //listo
     {
         $jwt = new JwtAuth();
-        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($adminVerified && $artistaVerified != null) {
         $data = Envio::all();
         $response = array(
             "status" => 200,
@@ -31,29 +34,41 @@ class EnvioController
         return response()->json($response, 200);
     }
 
-    public function indexByUserId(Request $request)
+    public function indexByUser(Request $request, $id) //Por discutir
     {
         $jwt = new JwtAuth();
-        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->idUsuario;
-        $facturasIds = Factura::where('idUsuario', $idUsuario)->pluck('id');
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($artistaVerified) {
+            $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
+            $facturas = Factura::whereIn('idObra', $obras)->pluck('id');
+            $data = Envio::whereIn('idFactura', $facturas);
+        } else if (!$adminVerified){
+            $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
+            $data = Envio::whereIn('idFactura', $facturas);
+        } else {
+            $facturas = Factura::where('idUsuario', $id)->pluck('id');
+            $data = Envio::whereIn('idFactura', $facturas);
+        }
 
-        if ($facturasIds->isEmpty()) {
+        if (!$data) {
             $response = array(
                 "status" => 404,
-                "message" => "No se encontraron facturas para el usuario",
+                "message" => "No se encontraron envios",
             );
             return response()->json($response, 404);
         }
-        $data = Envio::whereIn('idFactura', $facturasIds)->get();
+        
         $response = array(
             "status" => 200,
-            "message" => "Todos los registros de envios del usuario",
+            "message" => "Todos los registros de envios",
             "data" => $data
         );
         return response()->json($response, 200);
     }
 
-    public function store(Request $request)
+    public function store(Request $request) //Listo
     {
 
         $data_input = $request->input('data', null);
@@ -62,7 +77,7 @@ class EnvioController
             $data = array_map('trim', $data);
             $rules = [
                 'estado' => 'required|string|max:255',
-                'fechaEnviado' => 'required|date',
+                'fechaEnviado' => 'date',
                 'fechaRecibido' => 'date',
                 'idFactura' => 'required',
             ];
@@ -96,14 +111,14 @@ class EnvioController
         return response()->json($response, $response['status']);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id) //Listo
     {
         $authArtista = false;
 
         $jwt = new JwtAuth();
         $authUserAdmin = $jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario;
-        if ($authUserAdmin === null) {
-            $idArtista = $jwt->checkToken($request->header('bearertoken'), true)->id;
+        if ($authUserAdmin == null) {
+            $idArtista = $jwt->checkToken($request->header('bearertoken'), true)->iss;
             $obra = Obra::find($request['idFactura']->idObra);
             if ($obra->idArtista === $idArtista){
                 $authArtista = true;
@@ -175,10 +190,13 @@ class EnvioController
         return response()->json($response, $response['status']);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id) //Listo
     {
         $jwt = new JwtAuth();
-        if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($adminVerified && !$artistaVerified) {
             if (isset($id)) {
                 $deleted = Envio::where('id', $id)->delete();
                 if ($deleted) {
