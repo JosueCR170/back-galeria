@@ -17,38 +17,34 @@ class EnvioController
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
-        if ($adminVerified && $artistaVerified != null) {
-        $data = Envio::all();
-        $response = array(
-            "status" => 200,
-            "message" => "Todos los registros de envios",
-            "data" => $data
-        );
-    } else {
-        $response = array(
-            'status' => 406,
-            'menssage' => 'No tienes permiso de administrador'
 
-        );
-    }
+        if ($adminVerified && $artistaVerified == null) {
+            $data = Envio::all();
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de envios",
+                "data" => $data
+            );
+        } else {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+            );
+        }
         return response()->json($response, 200);
     }
 
-    public function indexByUser(Request $request, $id) //Por discutir
+    public function indexByUser(Request $request) //Por discutir
     {
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
-        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
         if ($artistaVerified) {
             $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
             $facturas = Factura::whereIn('idObra', $obras)->pluck('id');
             $data = Envio::whereIn('idFactura', $facturas);
-        } else if (!$adminVerified){
-            $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
-            $data = Envio::whereIn('idFactura', $facturas);
         } else {
-            $facturas = Factura::where('idUsuario', $id)->pluck('id');
+            $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
             $data = Envio::whereIn('idFactura', $facturas);
         }
 
@@ -59,13 +55,69 @@ class EnvioController
             );
             return response()->json($response, 404);
         }
-        
+
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de envios",
             "data" => $data
         );
         return response()->json($response, 200);
+    }
+
+    public function indexByUserAdmin(Request $request, $aux, $id) //Por discutir
+    {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($adminVerified && $artistaVerified == null) {
+            if ($aux == 1) {
+            $obras = Obra::where('idArtista', $id)->pluck('id');
+            $facturas = Factura::whereIn('idObra', $obras)->pluck('id');
+            $data = Envio::whereIn('idFactura', $facturas);
+            } else {
+                $facturas = Factura::where('idUsuario', $id)->pluck('id');
+            $data = Envio::whereIn('idFactura', $facturas);
+            }
+
+            if (!$data) {
+                $response = array(
+                    "status" => 404,
+                    "message" => "No se encontraron envios",
+                );
+                return response()->json($response, 404);
+            }
+
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de envios",
+                "data" => $data
+            );
+        } else {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+            );
+        }
+        return response()->json($response, 200);
+    }
+
+    public function show(Request $request, $id)
+    {
+            $data = Factura::find($id);
+            if (is_object($data)) {
+                $response = array(
+                    'status' => 200,
+                    'message' => 'Datos del envio',
+                    'Artista' => $data
+                );
+            } else {
+                $response = array(
+                    'status' => 404,
+                    'message' => 'Recurso no encontrado'
+                );
+            }
+        return response()->json($response, $response['status']);
     }
 
     public function store(Request $request) //Listo
@@ -77,16 +129,12 @@ class EnvioController
             $data = array_map('trim', $data);
             $rules = [
                 'estado' => 'required|string|max:255',
-                'fechaEnviado' => 'date',
-                'fechaRecibido' => 'date',
                 'idFactura' => 'required',
             ];
             $isValid = \validator($data, $rules);
             if (!$isValid->fails()) {
                 $Envio = new Envio();
                 $Envio->estado = $data['estado'];
-                $Envio->fechaEnviado = $data['fechaEnviado'];
-                $Envio->fechaRecibido = $data['fechaRecibido'];
                 $Envio->idFactura = $data['idFactura'];
 
                 $Envio->save();
@@ -113,19 +161,12 @@ class EnvioController
 
     public function update(Request $request, $id) //Listo
     {
-        $authArtista = false;
-
         $jwt = new JwtAuth();
-        $authUserAdmin = $jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario;
-        if ($authUserAdmin == null) {
-            $idArtista = $jwt->checkToken($request->header('bearertoken'), true)->iss;
-            $obra = Obra::find($request['idFactura']->idObra);
-            if ($obra->idArtista === $idArtista){
-                $authArtista = true;
-            }
-        }
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-        if ($authUserAdmin || $authArtista) {
+        if ($adminVerified || $artistaVerified) {
             $envio = Envio::find($id);
             if (!$envio) {
                 $response = [

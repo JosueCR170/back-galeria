@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ObraController;
@@ -44,10 +45,11 @@ Route::prefix('v1')->group(
         Route::delete('/factura/{id}',[FacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         
         //Envio
-
-        
-
-        
+        Route::post('/envio/store',[EnvioController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
+        Route::get('/envio',[EnvioController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/envio/{id}',[EnvioController::class,'show'])->middleware(ApiAuthMiddleware::class);
+        Route::delete('/envio/{id}',[EnvioController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::put('/envio/{id}',[EnvioController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
     }
 );
 
