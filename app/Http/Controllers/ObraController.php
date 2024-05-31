@@ -23,6 +23,28 @@ class ObraController
         return response()->json($response, 200);
     }
 
+    public function getTecnica()
+    {
+        $data = Obra::getTecnica();
+        $response = array(
+            "status" => 200,
+            "message" => "Todas las tecnicas de las obras",
+            "data" => $data
+        );
+        return response()->json($response, 200);
+    }
+
+    public function getCategoria()
+    {
+        $data = Obra::getCategoria();
+        $response = array(
+            "status" => 200,
+            "message" => "Todas las categorias de las obras",
+            "data" => $data
+        );
+        return response()->json($response, 200);
+    }
+
 
     public function store(Request $request)
     {

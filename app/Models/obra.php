@@ -12,39 +12,39 @@ class Obra extends Model
     protected $table = "obras";
 
     protected static $tecnicasArte = [
-        'Óleo sobre lienzo',
-        'Acuarela',
-        'Acuarela sobre papel',
-        'Témpera',
-        'Pintura al pastel',
-        'Pintura al fresco',
-        'Pintura digital',
-        'Talla en madera',
-        'Escultura en mármol',
-        'Grabado',
-        'Serigrafía',
-        'Fotografía artística',
-        'Arte digital',
+        'Oil on canvas',
+        'Watercolor',
+        'Watercolor on paper',
+        'Tempera',
+        'Pastel painting',
+        'Fresco painting',
+        'Digital painting',
+        'Wood carving',
+        'Marble sculpture',
+        'Engraving',
+        'Serigraphy',
+        'Art photography',
+        'Digital art',
         'Collage',
-        'Pirograbado',
-        'Escultura en bronce'
+        'Pyrography',
+        'Bronze sculpture'
     ];
 
     protected static $categorias = [
-        'Cubismo',
-        'Impresionismo',
-        'Expresionismo',
-        'Realismo',
-        'Surrealismo',
-        'Abstracto',
-        'Renacimiento',
-        'Barroco',
-        'Rococó',
-        'Romanticismo',
-        'Neoclasicismo',
-        'Modernismo',
-        'Arte Pop',
-        'Arte Naïf'
+    'Cubism',
+    'Impressionism',
+    'Expressionism',
+    'Realism',
+    'Surrealism',
+    'Abstract',
+    'Renaissance',
+    'Baroque',
+    'Rococo',
+    'Romanticism',
+    'Neoclassicism',
+    'Modernism',
+    'Pop Art',
+    'Naïve Art'
     ];
 
     public static function getTecnica(){return self::$tecnicasArte;}

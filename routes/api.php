@@ -32,10 +32,13 @@ Route::prefix('v1')->group(
         
         //Obra
         Route::get('/obra',[ObraController::class,'index']);//-
+        Route::get('/obra/categorias',[ObraController::class,'getCategoria']);
+        Route::get('/obra/tecnicas',[ObraController::class,'getTecnica']);
         Route::get('/obra/{id}',[ObraController::class,'show']);//-
         Route::post('/obra/store',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);//-
         Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
         Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
+
         //Factura
         Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::get('/factura',[FacturaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
