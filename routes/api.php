@@ -15,7 +15,7 @@ Route::prefix('v1')->group(
         //user
         Route::post('/user/store',[UserController::class,'store']);//-
         Route::post('/user/login',[UserController::class,'login']);//-
-        Route::get('/user/getIdentity',[UserController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//user -
+        Route::get('/user/getidentity',[UserController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//user -
         Route::get('/user/{id}',[UserController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::get('/user',[UserController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/user/{id}',[UserController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-user - -
@@ -24,7 +24,7 @@ Route::prefix('v1')->group(
         //artista
         Route::post('/artista/store',[ArtistaController::class,'store']);//-
         Route::post('/artista/login',[ArtistaController::class,'login']);//-
-        Route::get('/artista/getIdentity',[ArtistaController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//-
+        Route::get('/artista/getidentity',[ArtistaController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//-
         Route::get('/artista/{id}',[ArtistaController::class,'show']);//-
         Route::get('/artista',[ArtistaController::class,'index']);//-
         Route::put('/artista/{id}',[ArtistaController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
