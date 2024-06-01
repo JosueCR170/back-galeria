@@ -15,6 +15,7 @@ class ObraController
     {
         $data = Obra::all();
         $data=$data->load('artista');
+
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de las obras",
