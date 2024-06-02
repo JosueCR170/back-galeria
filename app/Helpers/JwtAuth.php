@@ -26,7 +26,7 @@ class JwtAuth
                 'telefono' => $user->telefono,
                 'correo' => $user->correo,
                 'tipoUsuario' => $user->tipoUsuario,
-                'usuario' => $user->usuario,
+                'nombreUsuario' => $user->nombreUsuario,
                 'iat' => time(),
                 'exp' => time() + (10000)
             );
