@@ -24,7 +24,7 @@ class JwtAuth
                 'iss' => $user->id,
                 'nombre' => $user->nombre,
                 'telefono' => $user->telefono,
-                'correo' => $user->correo,
+                'correo' => $user->email,
                 'tipoUsuario' => $user->tipoUsuario,
                 'nombreUsuario' => $user->nombreUsuario,
                 'iat' => time(),
