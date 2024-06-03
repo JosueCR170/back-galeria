@@ -20,8 +20,10 @@ return new class extends Migration
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
             $table->string('estado');
-            $table->date('fechaEnviado');
-            $table->date('fechaRecibido');
+            $table->string('direccion');
+            $table->string('codigoPostal');
+            $table->date('fechaEnviado')->nullable();
+            $table->date('fechaRecibido')->nullable();
             $table->timestamps();
         });
     }

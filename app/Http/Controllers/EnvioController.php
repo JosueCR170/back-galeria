@@ -130,12 +130,25 @@ class EnvioController
             $rules = [
                 'estado' => 'required|string|max:255',
                 'idFactura' => 'required',
+                'direccion'=>'required',
+                'codigoPostal'=>'required',
+                'fechaEnviado'=>'date',
+                'fechaRecibido'=>'date'
             ];
             $isValid = \validator($data, $rules);
             if (!$isValid->fails()) {
                 $Envio = new Envio();
                 $Envio->estado = $data['estado'];
                 $Envio->idFactura = $data['idFactura'];
+                $Envio->direccion = $data['direccion'];
+                $Envio->codigoPostal = $data['codigoPostal'];
+
+                if (isset($data_input['fechaEnviado'])) {
+                    $Envio->fechaEnviado = $data_input['fechaEnviado'];
+                }
+                if (isset($data_input['fechaRecibido'])) {
+                    $Envio->fechaRecibido = $data_input['fechaRecibido'];
+                }
 
                 $Envio->save();
                 $response = array(
@@ -188,9 +201,9 @@ class EnvioController
             }
 
             $rules = [
-                'estado' => 'string|max:255',
-                'fechaEnviado' => 'date',
-                'fechaRecibido' => 'date',
+                   'estado' => 'string|max:255',
+                'fechaEnviado'=>'date',
+                'fechaRecibido'=>'date'
             ];
 
             $validator = \validator($data_input, $rules);
@@ -207,9 +220,16 @@ class EnvioController
             if (isset($data_input['estado'])) {
                 $envio->estado = $data_input['estado'];
             }
+            if (isset($data_input['direccion'])) {
+                $envio->direccion = $data_input['direccion'];
+            }
+            if (isset($data_input['codigoPostal'])) {
+                $envio->codigoPostal = $data_input['codigoPostal'];
+            }
             if (isset($data_input['fechaEnviado'])) {
                 $envio->fechaEnviado = $data_input['fechaEnviado'];
             }
+
             if (isset($data_input['fechaRecibido'])) {
                 $envio->fechaRecibido = $data_input['fechaRecibido'];
             }
