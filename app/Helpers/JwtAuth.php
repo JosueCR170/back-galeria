@@ -24,9 +24,9 @@ class JwtAuth
                 'iss' => $user->id,
                 'nombre' => $user->nombre,
                 'telefono' => $user->telefono,
-                'correo' => $user->correo,
+                'email' => $user->email,
                 'tipoUsuario' => $user->tipoUsuario,
-                'usuario' => $user->usuario,
+                'nombreUsuario' => $user->nombreUsuario,
                 'iat' => time(),
                 'exp' => time() + (10000)
             );
