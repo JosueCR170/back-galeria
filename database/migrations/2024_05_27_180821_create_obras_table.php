@@ -25,12 +25,11 @@ return new class extends Migration
             $table->float('precio');
             $table->boolean('disponibilidad');
             $table->string('categoria');
-            $table->binary('imagen');
+            $table->string('imagen');
             $table->date('fechaCreacion');
             $table->date('fechaRegistro');
             $table->timestamps();
         });
-        DB::statement('ALTER TABLE obras MODIFY COLUMN imagen MEDIUMBLOB');
     }
 
     /**

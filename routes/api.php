@@ -35,7 +35,9 @@ Route::prefix('v1')->group(
         Route::get('/obra/categorias',[ObraController::class,'getCategoria']);
         Route::get('/obra/tecnicas',[ObraController::class,'getTecnica']);
         Route::get('/obra/{id}',[ObraController::class,'show']);//-
+        Route::get('/obra/getimage/{filename}',[ObraController::class,'getImage']);//-
         Route::post('/obra/store',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);//-
+        Route::post('/obra/uploadimage',[ObraController::class,'uploadImage'])->middleware(ApiAuthMiddleware::class);//-
         Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
         Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
 

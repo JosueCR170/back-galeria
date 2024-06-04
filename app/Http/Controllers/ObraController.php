@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Obra;
 use Illuminate\Http\Request;
 use App\Helpers\JwtAuth;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 
 class ObraController
@@ -14,7 +15,7 @@ class ObraController
     public function index()
     {
         $data = Obra::all();
-        $data=$data->load('artista');
+        $data = $data->load('artista');
 
         $response = array(
             "status" => 200,
@@ -46,58 +47,93 @@ class ObraController
         return response()->json($response, 200);
     }
 
+    public function uploadImage(Request $request)
+    {
+        // $isValid = \Validator::make(
+        //     $request->all(),
+        //     ['file' => 'required image mimes: jpg,png, jpeg, svg, gif']
+        // );
+        // if (!$isValid->fails()) {
+            $image = $request->file('file');
+            $filename = \Str::uuid() . "." . $image->getClientOriginalExtension();
+            \Storage::disk('obras')->put($filename, \File::get($image));
+            $response = array(
+                'status' => 201,
+                'message' => 'Imagen Guardada',
+                'filename' => $filename,
+            );
+        // } else {
+        //     $response = array(
+        //         'status' => 406,
+        //         'message' => 'Error: no se encontro el archivo',
+        //         'errors' => $isValid->errors(),
+        //     );
+        // }
+        return response()->json($response, $response['status']);
+    }
 
+    public function getImage($filename)
+    {
+        if (isset($filename)) {
+            $exist = \Storage::disk('obras')->exists($filename);
+            if ($exist) {
+                $file = \Storage::disk('obras')->get($filename);
+                return new Response($file, 200);
+            } else {
+                $response = array(
+                    'status' => 404,
+                    'message' => 'Imagen no existe'
+                );
+            }
+        } else {
+            $response = array(
+                'status' => 406,
+                'message' => 'No se definió el nombre de la imagen'
+            );
+        }
+        return response()->json($response, $response['status']);
+
+    }
     public function store(Request $request)
     {
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
-        
-        $idArtistaRule='';
 
-        if ($adminVerified !==null || $artistaVerified !==null) {
-        if ($adminVerified !==null) {
-            $idArtistaRule='required|exists:artista,id';
-        }
+        if ($adminVerified !== null || $artistaVerified !== null) {
             $data_input = $request->input('data', null);
-            $file = $request->file('file');
 
-            if ($data_input && $file) {
+            if ($data_input) {
                 $data = json_decode($data_input, true);
                 $data = array_map('trim', $data);
 
-                $tecnica=Obra::getTecnica();
-                $categoria=Obra::getCategoria();
-                $isValid = \Validator::make(array_merge($data, ['file' => $file]), [
-                    'idArtista' => $idArtistaRule,
+                $tecnica = Obra::getTecnica();
+                $categoria = Obra::getCategoria();
+                $rules = [
+                    'idArtista' => 'required',
                     'tecnica' => ['required', Rule::in($tecnica)],
                     'nombre' => 'required|string',
                     'tamano' => 'required|string',
                     'precio' => 'required|decimal:0,2',
                     'disponibilidad' => 'required|boolean',
                     'categoria' => ['required', Rule::in($categoria)],
-                    'file' => 'required|image',
+                    'imagen' => 'required|string',
                     'fechaCreacion' => 'required|date',
                     'fechaRegistro' => 'required|date'
-                ]);
-
+                ];
+                $isValid = \validator($data, $rules);
                 if (!$isValid->fails()) {
-                    $imageContent = base64_encode(file_get_contents($file));
-
                     $obra = new Obra();
 
-                    if($artistaVerified !=null){
-                        $obra->idArtista= $data['$idArtista'] = $decodedToken->iss;
-                    }else{$obra->idArtista = $data['idArtista'];}
-                    
+                    $obra->idArtista = $data['idArtista'];
                     $obra->tecnica = $data['tecnica'];
                     $obra->nombre = $data['nombre'];
                     $obra->tamano = $data['tamano'];
                     $obra->precio = $data['precio'];
                     $obra->disponibilidad = $data['disponibilidad'];
                     $obra->categoria = $data['categoria'];
-                    $obra->imagen = $imageContent;
+                    $obra->imagen = $data['imagen'];
                     $obra->fechaCreacion = $data['fechaCreacion'];
                     $obra->fechaRegistro = $data['fechaRegistro'];
                     $obra->save();
@@ -111,7 +147,7 @@ class ObraController
                     $response = [
                         'status' => 406,
                         'message' => 'Error: verifica rellenar todos los datos',
-                        'error' => $isValid->errors()
+                        'error' => $isValid->errors(),
                     ];
                 }
             } else {
@@ -137,7 +173,7 @@ class ObraController
         $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-        if ($adminVerified !==null || $artistaVerified !==null) {
+        if ($adminVerified !== null || $artistaVerified !== null) {
 
             if (isset($id)) {
                 $delete = Obra::where('id', $id)->delete();
@@ -158,14 +194,14 @@ class ObraController
                     'menssage' => 'Falta el identificador del recurso a eliminar'
                 );
             }
-           
+
         } else {
 
             $response = array(
                 'status' => 406,
                 'menssage' => 'No tienes permiso de administrador'
-            );       
-    }
+            );
+        }
         return response()->json($response, $response['status']);
     }
 
@@ -175,9 +211,9 @@ class ObraController
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
-        
-        if ($adminVerified !==null || $artistaVerified !==null) {
-       
+
+        if ($adminVerified !== null || $artistaVerified !== null) {
+
             $obra = Obra::find($id);
             if (!$obra) {
                 $response = [
@@ -186,7 +222,7 @@ class ObraController
                 ];
                 return response()->json($response, $response['status']);
             }
-    
+
             $data_input = $request->input('data', null);
             $file = $request->file('file');
 
@@ -202,8 +238,8 @@ class ObraController
                 $data = json_decode($data_input, true);
                 $data = array_map('trim', $data);
 
-                $tecnica=Obra::getTecnica();
-                $categoria=Obra::getCategoria();
+                $tecnica = Obra::getTecnica();
+                $categoria = Obra::getCategoria();
                 $isValid = \Validator::make($data, [
 
                     'tecnica' => Rule::in($tecnica),
@@ -224,52 +260,51 @@ class ObraController
                     ];
                     return response()->json($response, $response['status']);
                 }
-               
 
-                    $obra->tecnica = isset($data['tecnica']) ? $data['tecnica'] : $obra->tecnica ;
-                    $obra->nombre = isset($data['nombre']) ? $data['nombre'] : $obra->nombre ;
-                    $obra->tamano = isset($data['tamano']) ? $data['tamano'] : $obra->tamano ;
-                    $obra->precio = isset($data['precio']) ? $data['precio'] : $obra->precio ;
-                    $obra->disponibilidad = isset($data['disponibilidad']) ? $data['disponibilidad'] : $obra->disponibilidad ;
-                    $obra->categoria = isset($data['categoria']) ? $data['categoria'] : $obra->categoria ;
-                    $obra->fechaCreacion = isset($data['fechaCreacion']) ? $data['fechaCreacion'] : $obra->fechaCreacion ;
-                    $obra->fechaRegistro = isset($data['fechaRegistro']) ? $data['fechaRegistro'] : $obra->fechaRegistro ;
+
+                $obra->tecnica = isset($data['tecnica']) ? $data['tecnica'] : $obra->tecnica;
+                $obra->nombre = isset($data['nombre']) ? $data['nombre'] : $obra->nombre;
+                $obra->tamano = isset($data['tamano']) ? $data['tamano'] : $obra->tamano;
+                $obra->precio = isset($data['precio']) ? $data['precio'] : $obra->precio;
+                $obra->disponibilidad = isset($data['disponibilidad']) ? $data['disponibilidad'] : $obra->disponibilidad;
+                $obra->categoria = isset($data['categoria']) ? $data['categoria'] : $obra->categoria;
+                $obra->fechaCreacion = isset($data['fechaCreacion']) ? $data['fechaCreacion'] : $obra->fechaCreacion;
+                $obra->fechaRegistro = isset($data['fechaRegistro']) ? $data['fechaRegistro'] : $obra->fechaRegistro;
             }
-                    if ($file) {
-                        $imageContent = base64_encode(file_get_contents($file));
-                        $obra->imagen = $imageContent;
-                    }
-                   
-                    $obra->save();
+            if ($file) {
+                $imageContent = base64_encode(file_get_contents($file));
+                $obra->imagen = $imageContent;
+            }
 
-                    $response = [
-                        'status' => 200,
-                        'message' => 'Obra actualizada',
-                        'obra' => $obra
-                    ];
+            $obra->save();
+
+            $response = [
+                'status' => 200,
+                'message' => 'Obra actualizada',
+                'obra' => $obra
+            ];
         }
         return response()->json($response, $response['status']);
     }
 
     public function show($id)
     {
-            $data=Obra::find($id);
-            if(is_object($data)){
-                $data=$data->load('artista');
-                $response=array(
-                'status'=>200,
-                'menssage'=>'obra encontrada',
-                'obra'=>$data
-                );
-            }
-            else{
-                $response = array(
-                    'status'=>404,
-                    'menssage'=>'Recurso no encontrado'
-                );
+        $data = Obra::find($id);
+        if (is_object($data)) {
+            $data = $data->load('artista');
+            $response = array(
+                'status' => 200,
+                'menssage' => 'obra encontrada',
+                'obra' => $data
+            );
+        } else {
+            $response = array(
+                'status' => 404,
+                'menssage' => 'Recurso no encontrado'
+            );
 
-            }
-            return response()->json($response,$response['status']);
+        }
+        return response()->json($response, $response['status']);
 
     }
 
