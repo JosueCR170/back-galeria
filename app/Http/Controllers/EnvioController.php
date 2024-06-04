@@ -129,9 +129,11 @@ class EnvioController
             $data = array_map('trim', $data);
             $rules = [
                 'estado' => 'required|string|max:255',
-                'idFactura' => 'required',
-                'direccion'=>'required',
+                'idFactura' => 'required|exists:facturas,id',
+                'direccion'=>'required|string',
                 'codigoPostal'=>'required',
+                'provincia'=>'required|string',
+                'ciudad'=>'required|string',
                 'fechaEnviado'=>'date',
                 'fechaRecibido'=>'date'
             ];
@@ -142,6 +144,8 @@ class EnvioController
                 $Envio->idFactura = $data['idFactura'];
                 $Envio->direccion = $data['direccion'];
                 $Envio->codigoPostal = $data['codigoPostal'];
+                $Envio->provincia = $data['provincia'];
+                $Envio->ciudad = $data['ciudad'];
 
                 if (isset($data_input['fechaEnviado'])) {
                     $Envio->fechaEnviado = $data_input['fechaEnviado'];
@@ -201,7 +205,11 @@ class EnvioController
             }
 
             $rules = [
-                   'estado' => 'string|max:255',
+                'estado' => 'string|max:255',
+                'idFactura' => 'exists:facturas,id',
+                'direccion'=>'string',
+                'provincia'=>'string',
+                'ciudad'=>'string',
                 'fechaEnviado'=>'date',
                 'fechaRecibido'=>'date'
             ];
@@ -222,6 +230,12 @@ class EnvioController
             }
             if (isset($data_input['direccion'])) {
                 $envio->direccion = $data_input['direccion'];
+            }
+            if (isset($data_input['provincia'])) {
+                $envio->provincia = $data_input['provincia'];
+            }
+            if (isset($data_input['ciudad'])) {
+                $envio->ciudad = $data_input['ciudad'];
             }
             if (isset($data_input['codigoPostal'])) {
                 $envio->codigoPostal = $data_input['codigoPostal'];

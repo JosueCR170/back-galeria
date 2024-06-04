@@ -21,6 +21,8 @@ return new class extends Migration
             ->cascadeOnDelete();
             $table->string('estado');
             $table->string('direccion');
+            $table->string('provincia');
+            $table->string('ciudad');
             $table->string('codigoPostal');
             $table->date('fechaEnviado')->nullable();
             $table->date('fechaRecibido')->nullable();
