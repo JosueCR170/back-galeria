@@ -37,7 +37,7 @@ class UserController
                 $data = array_map('trim', $data);
                 $rules = [
                     'nombre' => 'required|string|max:80',
-                    'telefono' => 'numeric',
+                    'telefono' => 'nullable|numeric',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required|alpha_dash',
                     'nombreUsuario' => 'required|string|max:45|unique:users,nombreUsuario',
@@ -46,9 +46,7 @@ class UserController
                 if (!$validator->fails()) {
                     $user = new User();
                     $user->nombre = $data['nombre'];
-                    if (isset($data['telefono'])) {
-                        $user->telefono = $data['telefono'];
-                    }
+                    $user->telefono = is_null($data['telefono']) ? null : (int)$data['telefono'];
                     // $user->telefono = $data['telefono'];
                     $user->email = $data['email'];
                     $user->password = hash('sha256', $data['password']);
@@ -144,6 +142,7 @@ class UserController
         return response()->json($response, $response['status']);
     }
 
+    //posible error al actualizar telefono, verlo despues
     public function update(Request $request, $id)
 {
     $jwt = new JwtAuth();
@@ -177,7 +176,7 @@ class UserController
 
     $rules = [
         'nombre' => 'string|max:80',
-        'telefono' => 'numeric',
+        'telefono' => 'nullable|numeric',
         'password' => 'alpha_dash',
         'nombreUsuario' => 'string|max:80'
     ];
