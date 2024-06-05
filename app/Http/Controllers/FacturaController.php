@@ -59,6 +59,28 @@ class FacturaController
         return response()->json($response, 200);
     }
 
+    public function indexByArtistId($id)
+    {
+            $obras = Obra::where('idArtista', $id)->get();
+
+            $facturas = [];
+
+            // Iterar sobre cada obra y obtener sus facturas
+            foreach ($obras as $obra) {
+                $facturasObra = Factura::where('idObra', $obra->id)->get();
+                foreach ($facturasObra as $factura) {
+                    $facturas[] = $factura;
+                }
+            }
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los registros de facturas del artista",
+                "data" => $facturas
+            );
+        
+        return response()->json($response, 200);
+    }
+
     public function show(Request $request, $id)
     {
         $jwt = new JwtAuth();

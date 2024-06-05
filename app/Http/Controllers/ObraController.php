@@ -287,6 +287,58 @@ class ObraController
         return response()->json($response, $response['status']);
     }
 
+    public function updateDisponibilidad(Request $request, $id)
+    {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        if ($adminVerified !== null || $artistaVerified !== null) {
+            $obra = Obra::find($id);
+            if (!$obra) {
+                $response = [
+                    'status' => 404,
+                    'message' => 'Obra no encontrada'
+                ];
+                return response()->json($response, $response['status']);
+            }
+
+            $data_input = $request->input('data', null);
+            if (!$data_input) {
+                $response = [
+                    'status' => 400,
+                    'message' => 'No se proporcionaron datos para actualizar'
+                ];
+                return response()->json($response, $response['status']);
+            }
+            if ($data_input) {
+                $data = json_decode($data_input, true);
+                $data = array_map('trim', $data);
+                $isValid = \Validator::make($data, [
+
+                    'disponibilidad' => 'boolean',
+                ]);
+
+                if ($isValid->fails()) {
+                    $response = [
+                        'status' => 406,
+                        'message' => 'Datos inválidos',
+                        'errors' => $isValid->errors()
+                    ];
+                    return response()->json($response, $response['status']);
+                }
+                $obra->disponibilidad = isset($data['disponibilidad']) ? $data['disponibilidad'] : $obra->disponibilidad;
+            }
+            $obra->save();
+            $response = [
+                'status' => 200,
+                'message' => 'Disponibilidad actualizada',
+                'obra' => $obra
+            ];
+        }
+        return response()->json($response, $response['status']);
+    }
+
     public function show($id)
     {
         $data = Obra::find($id);
