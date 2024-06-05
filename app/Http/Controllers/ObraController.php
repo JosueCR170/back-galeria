@@ -49,26 +49,26 @@ class ObraController
 
     public function uploadImage(Request $request)
     {
-        // $isValid = \Validator::make(
-        //     $request->all(),
-        //     ['file' => 'required image mimes: jpg,png, jpeg, svg, gif']
-        // );
-        // if (!$isValid->fails()) {
-            $image = $request->file('file');
-            $filename = \Str::uuid() . "." . $image->getClientOriginalExtension();
-            \Storage::disk('obras')->put($filename, \File::get($image));
-            $response = array(
-                'status' => 201,
-                'message' => 'Imagen Guardada',
-                'filename' => $filename,
-            );
-        // } else {
-        //     $response = array(
-        //         'status' => 406,
-        //         'message' => 'Error: no se encontro el archivo',
-        //         'errors' => $isValid->errors(),
-        //     );
-        // }
+        $image = $request->file('file');
+        $filename = \Str::uuid() . "." . $image->getClientOriginalExtension();
+        \Storage::disk('obras')->put($filename, \File::get($image));
+        $response = array(
+            'status' => 201,
+            'message' => 'Imagen Guardada',
+            'filename' => $filename,
+        );
+        return response()->json($response, $response['status']);
+    }
+
+    public function updateImage(Request $request, string $filename)
+    {
+        $image = $request->file('file');
+        \Storage::disk('obras')->put($filename, \File::get($image));
+        $response = array(
+            'status' => 201,
+            'message' => 'Imagen actualizada',
+            'filename' => $filename,
+        );
         return response()->json($response, $response['status']);
     }
 
@@ -213,7 +213,6 @@ class ObraController
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
         if ($adminVerified !== null || $artistaVerified !== null) {
-
             $obra = Obra::find($id);
             if (!$obra) {
                 $response = [
@@ -224,20 +223,17 @@ class ObraController
             }
 
             $data_input = $request->input('data', null);
-            $file = $request->file('file');
 
-            if (!$data_input && !$file) {
+            if (!$data_input) {
                 $response = [
                     'status' => 400,
-                    'message' => 'No se proporcionaron datos ni archivo para actualizar'
+                    'message' => 'No se proporcionaron datos para actualizar'
                 ];
                 return response()->json($response, $response['status']);
             }
 
             if ($data_input) {
                 $data = json_decode($data_input, true);
-                $data = array_map('trim', $data);
-
                 $tecnica = Obra::getTecnica();
                 $categoria = Obra::getCategoria();
                 $isValid = \Validator::make($data, [
@@ -246,7 +242,6 @@ class ObraController
                     'nombre' => 'string',
                     'tamano' => 'string',
                     'precio' => 'decimal:0,2',
-                    'disponibilidad' => 'boolean',
                     'categoria' => Rule::in($categoria),
                     'fechaCreacion' => 'date',
                     'fechaRegistro' => 'date'
@@ -266,14 +261,9 @@ class ObraController
                 $obra->nombre = isset($data['nombre']) ? $data['nombre'] : $obra->nombre;
                 $obra->tamano = isset($data['tamano']) ? $data['tamano'] : $obra->tamano;
                 $obra->precio = isset($data['precio']) ? $data['precio'] : $obra->precio;
-                $obra->disponibilidad = isset($data['disponibilidad']) ? $data['disponibilidad'] : $obra->disponibilidad;
                 $obra->categoria = isset($data['categoria']) ? $data['categoria'] : $obra->categoria;
                 $obra->fechaCreacion = isset($data['fechaCreacion']) ? $data['fechaCreacion'] : $obra->fechaCreacion;
                 $obra->fechaRegistro = isset($data['fechaRegistro']) ? $data['fechaRegistro'] : $obra->fechaRegistro;
-            }
-            if ($file) {
-                $imageContent = base64_encode(file_get_contents($file));
-                $obra->imagen = $imageContent;
             }
 
             $obra->save();
