@@ -40,8 +40,8 @@ Route::prefix('v1')->group(
         Route::post('/obra/store',[ObraController::class,'store'])->middleware(ApiAuthMiddleware::class);//-
         Route::post('/obra/uploadimage',[ObraController::class,'uploadImage'])->middleware(ApiAuthMiddleware::class);//-
 
-        Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
         Route::put('/obra/disp/{id}',[ObraController::class,'updateDisponibilidad'])->middleware(ApiAuthMiddleware::class);//-
+        Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
 
         Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
 
@@ -54,11 +54,11 @@ Route::prefix('v1')->group(
         Route::post('/factura/showwithdate',[FacturaController::class,'showWithDate'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::delete('/factura/{id}',[FacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
 
-       
         
         //Envio
         Route::post('/envio/store',[EnvioController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::get('/envio',[EnvioController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/envio/artist',[EnvioController::class,'indexByUser'])->middleware(ApiAuthMiddleware::class);//artist-user
         Route::get('/envio/{id}',[EnvioController::class,'show'])->middleware(ApiAuthMiddleware::class);
         Route::delete('/envio/{id}',[EnvioController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/envio/{id}',[EnvioController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -

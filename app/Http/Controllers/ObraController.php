@@ -303,7 +303,7 @@ class ObraController
             }
             if ($data_input) {
                 $data = json_decode($data_input, true);
-                $data = array_map('trim', $data);
+                // $data = array_map('trim', $data);
                 $isValid = \Validator::make($data, [
 
                     'disponibilidad' => 'boolean',

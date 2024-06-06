@@ -42,11 +42,11 @@ class EnvioController
         if ($artistaVerified) {
             $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
             $facturas = Factura::whereIn('idObra', $obras)->pluck('id');
-            $data = Envio::whereIn('idFactura', $facturas);
-        } else {
-            $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
-            $data = Envio::whereIn('idFactura', $facturas);
-        }
+            $data = Envio::whereIn('idFactura', $facturas)->get();
+         } //else {
+        //     $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
+        //     $data = Envio::whereIn('idFactura', $facturas);
+        // }
 
         if (!$data) {
             $response = array(
