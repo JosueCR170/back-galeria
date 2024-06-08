@@ -61,23 +61,23 @@ class FacturaController
 
     public function indexByArtistId($id)
     {
-            $obras = Obra::where('idArtista', $id)->get();
+        $obras = Obra::where('idArtista', $id)->get();
 
-            $facturas = [];
+        $facturas = [];
 
-            // Iterar sobre cada obra y obtener sus facturas
-            foreach ($obras as $obra) {
-                $facturasObra = Factura::where('idObra', $obra->id)->get();
-                foreach ($facturasObra as $factura) {
-                    $facturas[] = $factura;
-                }
+        // Iterar sobre cada obra y obtener sus facturas
+        foreach ($obras as $obra) {
+            $facturasObra = Factura::where('idObra', $obra->id)->get();
+            foreach ($facturasObra as $factura) {
+                $facturas[] = $factura;
             }
-            $response = array(
-                "status" => 200,
-                "message" => "Todos los registros de facturas del artista",
-                "data" => $facturas
-            );
-        
+        }
+        $response = array(
+            "status" => 200,
+            "message" => "Todos los registros de facturas del artista",
+            "data" => $facturas
+        );
+
         return response()->json($response, 200);
     }
 
@@ -175,65 +175,59 @@ class FacturaController
     {
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        $UserVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-        if ($artistaVerified) {
-            $response = array(
-                'status' => 406,
-                'menssage' => 'Error al crear la factura'
-            );
-        } else {
-            $data_input = $request->input('data', null);
-            if ($data_input) {
-                $data = json_decode($data_input, true);
-                $data = array_map('trim', $data);
-                $rules = [
-                    'idObra' => 'required|exists:obras,id',
-                    'fecha' => 'required|date',
-                    'descuento' => 'required',
-                ];
-                $isValid = \validator($data, $rules);
-                if (!$isValid->fails()) {
-                    $factura = new Factura();
-                    $obra = Obra::find($data['idObra']);
-                    $factura->idObra = $data['idObra'];
-                    $factura->fecha = $data['fecha'];
-                    $factura->subtotal = $obra->precio;
-                    $factura->descuento = $data['descuento'];
-                    $factura->total = $factura->subtotal - ($factura->subtotal * $factura->descuento);
-                    if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-                        $idUsuario = $data['idUsuario'];
-                        if (!isset($idUsuario)) {
-                            $response = array(
-                                'status' => 400,
-                                'message' => 'No se encontró el id del usuario'
-                            );
-                            return response()->json($response, $response['status']);
-                        }
-                    } else {
-                        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->iss;
+        $data_input = $request->input('data', null);
+        if ($data_input) {
+            $data = json_decode($data_input, true);
+            $data = array_map('trim', $data);
+            $rules = [
+                'idObra' => 'required|exists:obras,id',
+                'fecha' => 'required|date',
+                'descuento' => 'required',
+            ];
+            $isValid = \validator($data, $rules);
+            if (!$isValid->fails()) {
+                $factura = new Factura();
+                $obra = Obra::find($data['idObra']);
+                $factura->idObra = $data['idObra'];
+                $factura->fecha = $data['fecha'];
+                $factura->subtotal = $obra->precio;
+                $factura->descuento = $data['descuento'];
+                $factura->total = $factura->subtotal - ($factura->subtotal * $factura->descuento);
+                if ($UserVerified || $artistaVerified) {
+                    $idUsuario = $data['idUsuario'];
+                    if (!isset($idUsuario)) {
+                        $response = array(
+                            'status' => 400,
+                            'message' => 'No se encontró el id del usuario'
+                        );
+                        return response()->json($response, $response['status']);
                     }
-                    $factura->idUsuario = $idUsuario;
-
-                    $factura->save();
-                    $response = array(
-                        'status' => 201,
-                        'message' => 'Factura guardada',
-                        'Factura' => $factura
-                    );
                 } else {
-                    $response = array(
-                        'status' => 406,
-                        'message' => 'Datos inválidos',
-                        'errors' => $isValid->errors()
-                    );
+                    $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->iss;
                 }
+                $factura->idUsuario = $idUsuario;
+
+                $factura->save();
+                $response = array(
+                    'status' => 201,
+                    'message' => 'Factura guardada',
+                    'Factura' => $factura
+                );
             } else {
                 $response = array(
-                    'status' => 400,
-                    'message' => 'No se encontró el objeto data'
+                    'status' => 406,
+                    'message' => 'Datos inválidos',
+                    'errors' => $isValid->errors()
                 );
             }
+        } else {
+            $response = array(
+                'status' => 400,
+                'message' => 'No se encontró el objeto data'
+            );
         }
         return response()->json($response, $response['status']);
     }
