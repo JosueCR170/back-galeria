@@ -44,6 +44,7 @@ Route::prefix('v1')->group(
         Route::put('/obra/{id}',[ObraController::class,'update'])->middleware(ApiAuthMiddleware::class);//-
 
         Route::delete('/obra/{id}',[ObraController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//-
+        Route::delete('/obra/image/{filename}',[ObraController::class,'destroyImage'])->middleware(ApiAuthMiddleware::class);//-
 
         //Factura
         Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -

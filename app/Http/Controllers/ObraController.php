@@ -205,6 +205,22 @@ class ObraController
         return response()->json($response, $response['status']);
     }
 
+    public function destroyImage($filename){
+        if (\Storage::disk('obras')->exists($filename)){
+            \Storage::disk('obras')->delete($filename);
+            $response = array(
+                'status' => 200,
+                'menssage' => 'Imagen eliminada'
+            );
+        } else {
+            $response = array(
+                'status' => 404,
+                'menssage' => 'Imagen no encontrada'
+            );
+        }
+        return response()->json($response, $response['status']);
+    }
+
     public function update(Request $request, $id)
     {
         $jwt = new JwtAuth();
