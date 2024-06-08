@@ -118,7 +118,7 @@ class ArtistaController
                 'nombre' => 'string|max:80',
                 'password' => 'max:20',
                 'telefono' => 'max:11',
-                'nombreArtista' => 'unique:Artista|max:45',
+                'nombreArtista' => 'max:45',
             ];
 
             $validator = \validator($data_input, $rules);
