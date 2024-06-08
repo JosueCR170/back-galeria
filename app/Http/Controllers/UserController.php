@@ -202,7 +202,7 @@ class UserController
     if (isset($data_input['telefono'])) {
         $user->telefono = $data_input['telefono'];
     }
-    if (isset($data_input['password'])) {
+    if (isset($data_input['password']) || !empty($data_input['password'])) {
         $user->password = hash('sha256', $data_input['password']);
     }
     if (isset($data_input['nombreUsuario'])) {
