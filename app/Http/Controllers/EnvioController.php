@@ -206,12 +206,11 @@ class EnvioController
 
             $rules = [
                 'estado' => 'string|max:255',
-                'idFactura' => 'exists:facturas,id',
                 'direccion'=>'string',
                 'provincia'=>'string',
                 'ciudad'=>'string',
-                'fechaEnviado'=>'date',
-                'fechaRecibido'=>'date'
+                'fechaEnviado'=>'date|nullable',
+                'fechaRecibido'=>'date|nullable'
             ];
 
             $validator = \validator($data_input, $rules);
