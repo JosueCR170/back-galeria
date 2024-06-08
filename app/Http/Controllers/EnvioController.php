@@ -134,8 +134,8 @@ class EnvioController
                 'codigoPostal'=>'required',
                 'provincia'=>'required|string',
                 'ciudad'=>'required|string',
-                'fechaEnviado'=>'date',
-                'fechaRecibido'=>'date'
+                'fechaEnviado'=>'date | nullable',
+                'fechaRecibido'=>'date | null'
             ];
             $isValid = \validator($data, $rules);
             if (!$isValid->fails()) {
@@ -206,12 +206,8 @@ class EnvioController
 
             $rules = [
                 'estado' => 'string|max:255',
-                'idFactura' => 'exists:facturas,id',
-                'direccion'=>'string',
-                'provincia'=>'string',
-                'ciudad'=>'string',
-                'fechaEnviado'=>'date',
-                'fechaRecibido'=>'date'
+                'fechaEnviado'=>'date | nullable',
+                'fechaRecibido'=>'date | nullable'
             ];
 
             $validator = \validator($data_input, $rules);
@@ -228,22 +224,9 @@ class EnvioController
             if (isset($data_input['estado'])) {
                 $envio->estado = $data_input['estado'];
             }
-            if (isset($data_input['direccion'])) {
-                $envio->direccion = $data_input['direccion'];
-            }
-            if (isset($data_input['provincia'])) {
-                $envio->provincia = $data_input['provincia'];
-            }
-            if (isset($data_input['ciudad'])) {
-                $envio->ciudad = $data_input['ciudad'];
-            }
-            if (isset($data_input['codigoPostal'])) {
-                $envio->codigoPostal = $data_input['codigoPostal'];
-            }
             if (isset($data_input['fechaEnviado'])) {
                 $envio->fechaEnviado = $data_input['fechaEnviado'];
             }
-
             if (isset($data_input['fechaRecibido'])) {
                 $envio->fechaRecibido = $data_input['fechaRecibido'];
             }
