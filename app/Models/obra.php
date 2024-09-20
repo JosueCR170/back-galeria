@@ -54,7 +54,5 @@ class Obra extends Model
         return $this->belongsTo(Artista::class, 'idArtista');
     }
 
-    public function factura(){
-        return $this->hasOne(Factura::class, 'idObra');       
-    }
+    
 }

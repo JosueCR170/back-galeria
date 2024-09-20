@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\DetalleFacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ObraController;
 use Illuminate\Http\Request;
@@ -55,6 +56,11 @@ Route::prefix('v1')->group(
         Route::post('/factura/showwithdate',[FacturaController::class,'showWithDate'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::delete('/factura/{id}',[FacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
 
+        //DetalleFactura
+        Route::post('/detalleFactura/store',[DetalleFacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
+        Route::get('/detalleFactura',[DetalleFacturaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/detalleFactura/{id}',[DetalleFacturaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::delete('/detalleFactura/{id}',[DetalleFacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         
         //Envio
         Route::post('/envio/store',[EnvioController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -

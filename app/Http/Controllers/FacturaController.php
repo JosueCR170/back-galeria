@@ -59,27 +59,52 @@ class FacturaController
         return response()->json($response, 200);
     }
 
+    // public function indexByArtistId($id)
+    // {
+    //     $obras = Obra::where('idArtista', $id)->get();
+
+    //     $facturas = [];
+
+    //     // Iterar sobre cada obra y obtener sus facturas
+    //     foreach ($obras as $obra) {
+    //         $detalleFactura = DetalleFactura::where('idObra', $obra->id)->get();
+    //         foreach ($detalleFactura as $detalle) {
+    //             $facturas[] = Factura::where('id',$detalle->idFactura)->get();
+    //         }
+    //     }
+    //     $response = array(
+    //         "status" => 200,
+    //         "message" => "Todos los registros de facturas del artista",
+    //         "data" => $facturas
+    //     );
+
+    //     return response()->json($response, 200);
+    // }
     public function indexByArtistId($id)
-    {
-        $obras = Obra::where('idArtista', $id)->get();
+{
+    // Cargar todas las obras del artista junto con sus detalles de factura y facturas asociadas
+    $obras = Obra::where('idArtista', $id)
+        ->with(['detallesFactura.factura'])
+        ->get();
 
-        $facturas = [];
+    $facturas = [];
 
-        // Iterar sobre cada obra y obtener sus facturas
-        foreach ($obras as $obra) {
-            $facturasObra = Factura::where('idObra', $obra->id)->get();
-            foreach ($facturasObra as $factura) {
-                $facturas[] = $factura;
-            }
+    // Iterar sobre las obras y obtener las facturas
+    foreach ($obras as $obra) {
+        foreach ($obra->detallesFactura as $detalle) {
+            $facturas[] = $detalle->factura;
         }
-        $response = array(
-            "status" => 200,
-            "message" => "Todos los registros de facturas del artista",
-            "data" => $facturas
-        );
-
-        return response()->json($response, 200);
     }
+
+    $response = [
+        "status" => 200,
+        "message" => "Todos los registros de facturas del artista",
+        "data" => $facturas
+    ];
+
+    return response()->json($response, 200);
+}
+
 
     public function show(Request $request, $id)
     {
@@ -183,19 +208,15 @@ class FacturaController
             $data = json_decode($data_input, true);
             $data = array_map('trim', $data);
             $rules = [
-                'idObra' => 'required|exists:obras,id',
                 'fecha' => 'required|date',
-                'descuento' => 'required',
             ];
             $isValid = \validator($data, $rules);
             if (!$isValid->fails()) {
                 $factura = new Factura();
-                $obra = Obra::find($data['idObra']);
-                $factura->idObra = $data['idObra'];
+               
                 $factura->fecha = $data['fecha'];
-                $factura->subtotal = $obra->precio;
-                $factura->descuento = $data['descuento'];
-                $factura->total = $factura->subtotal - ($factura->subtotal * $factura->descuento);
+                $factura->total = $data['total'];
+
                 if ($UserVerified || $artistaVerified) {
                     $idUsuario = $data['idUsuario'];
                     if (!isset($idUsuario)) {
