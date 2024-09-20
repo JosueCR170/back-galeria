@@ -92,7 +92,6 @@ class ObraController
             );
         }
         return response()->json($response, $response['status']);
-
     }
     public function store(Request $request)
     {
