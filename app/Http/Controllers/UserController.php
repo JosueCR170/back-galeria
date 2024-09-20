@@ -3,11 +3,91 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Helpers\JwtAuth;
 
 class UserController
 {
+
+    public function paShow(Request $request, $id)
+    {
+        $jwt = new JwtAuth();
+        if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            $response = array(
+                'status' => 406,
+                'menssage' => 'No tienes permiso de administrador'
+
+            );
+        } else {
+        $data = DB::select('EXEC paBuscarUsuario ?', [$id] );
+        if (is_object($data)) {
+            $response = array(
+                'status' => 200,
+                'message' => 'Datos del usuario',
+                'user' => $data
+            );
+        } else {
+            $response = array(
+                'status' => 404,
+                'message' => 'Recurso no encontrado'
+            );
+        }
+    }
+        return response()->json($response, $response['status']);
+    }
+
+    public function paStore(Request $request)
+    {
+        $data_input = $request->input('data', null);
+        if ($data_input) {
+            $data = json_decode($data_input, true);
+            if ($data !== null) {
+                $data = array_map('trim', $data);
+                $rules = [
+                    'nombre' => 'required|string|max:80',
+                    'telefono' => 'nullable|numeric',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required|alpha_dash',
+                    'nombreUsuario' => 'required|string|max:45|unique:users,nombreUsuario',
+                ];
+                $validator = validator($data, $rules);
+                if (!$validator->fails()) {
+                    $nombre = $data['nombre'];
+                    $telefono = is_null($data['telefono']) ? null : (int)$data['telefono'];
+                    // $user->telefono = $data['telefono'];
+                    $email = $data['email'];
+                    $password = hash('sha256', $data['password']);
+                    $nombreUsuario = $data['nombreUsuario'];
+                    $tipoUsuario = false;
+                    DB::statement('EXEC paInsertarUsuario ?, ?, ?, ?, ?, ?', 
+                    [$nombre, $password, $telefono, $email, $tipoUsuario, $nombreUsuario]);
+                    $response = [
+                        'status' => 201,
+                        'message' => 'Usuario creado exitosamente'
+                    ];
+                } else {
+                    $response = [
+                        'status' => 406,
+                        'message' => 'Datos inválidos',
+                        'error' => $validator->errors()
+                    ];
+                }
+            } else {
+                $response = [
+                    'status' => 400,
+                    'message' => 'No se proporcionaron datos válidos',
+                ];
+            }
+        } else {
+            $response = [
+                'status' => 400,
+                'message' => 'No se encontró el objeto de datos (data)'
+            ];
+        }
+        return response()->json($response, $response['status']);
+    }
+
     public function index(Request $request)
     {
         $jwt = new JwtAuth();

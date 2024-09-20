@@ -14,10 +14,10 @@ use App\Http\Middleware\ApiAuthMiddleware;
 Route::prefix('v1')->group(
     function(){
         //user
-        Route::post('/user/store',[UserController::class,'store']);//-
+        Route::post('/user/store',[UserController::class,'paStore']);//-
         Route::post('/user/login',[UserController::class,'login']);//-
         Route::get('/user/getidentity',[UserController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//user -
-        Route::get('/user/{id}',[UserController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/user/{id}',[UserController::class,'paShow'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::get('/user',[UserController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/user/{id}',[UserController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-user - -
         Route::delete('/user/{id}',[UserController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
