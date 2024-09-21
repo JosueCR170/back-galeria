@@ -18,9 +18,9 @@ Route::prefix('v1')->group(
         Route::post('/user/login',[UserController::class,'login']);//-
         Route::get('/user/getidentity',[UserController::class,'getIdentity'])->middleware(ApiAuthMiddleware::class);//user -
         Route::get('/user/{id}',[UserController::class,'paShow'])->middleware(ApiAuthMiddleware::class);//admin -
-        Route::get('/user',[UserController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
-        Route::put('/user/{id}',[UserController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-user - -
-        Route::delete('/user/{id}',[UserController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::get('/user',[UserController::class,'paIndex'])->middleware(ApiAuthMiddleware::class);//admin -
+        Route::put('/user/{id}',[UserController::class,'paUpdate'])->middleware(ApiAuthMiddleware::class);//admin-user - -
+        Route::delete('/user/{id}',[UserController::class,'paDestroy'])->middleware(ApiAuthMiddleware::class);//admin -
 
         //artista
         Route::post('/artista/store',[ArtistaController::class,'store']);//-

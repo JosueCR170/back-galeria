@@ -23,9 +23,9 @@ class JwtAuth
             $token = array(
                 'iss' => $user->id,
                 'nombre' => $user->nombre,
-                'telefono' => $user->telefono,
+                'telefono' => intval($user->telefono),
                 'email' => $user->email,
-                'tipoUsuario' => $user->tipoUsuario,
+                'tipoUsuario' => intval($user->tipoUsuario),
                 'nombreUsuario' => $user->nombreUsuario,
                 'iat' => time(),
                 'exp' => time() + (10000)
@@ -46,7 +46,7 @@ class JwtAuth
             $token=array(
                 'iss'=>$artista->id,
                 'nombre'=>$artista->nombre,
-                'telefono'=>$artista->telefono,
+                'telefono'=>intval($artista->telefono),
                 'correo'=>$artista->correo,
                 'nombreArtista'=>$artista->nombreArtista,
                 'iat'=>time(),
