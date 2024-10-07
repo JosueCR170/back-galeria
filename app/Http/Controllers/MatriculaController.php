@@ -161,5 +161,4 @@ class MatriculaController
 
         return response()->json($response, $response['status']);
     }
-
 }
