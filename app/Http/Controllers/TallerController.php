@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Helpers\JwtAuth;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use App\Models\taller;
 class TallerController
 {
 
@@ -34,7 +36,7 @@ class TallerController
     }
 
 
-    public function paStore(Request $request)
+    public function store(Request $request)
     {
         $data_input = $request->input('data', null);
         if ($data_input) {
@@ -111,19 +113,10 @@ class TallerController
     if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
         if (isset($id)) {
             DB::statement('EXEC paEliminarTaller ?', [$id]);
-            $deleted = DB::table('talleres')->where('id', $id)->delete();
-
-            if ($deleted) {
-                $response = array(
-                    'status' => 200,
-                    'message' => 'Taller eliminado'
-                );
-            } else {
-                $response = array(
-                    'status' => 404,
-                    'message' => 'El taller no se encontró o no pudo ser eliminado'
-                );
-            }
+            $response = array(
+                'status' => 200,
+                'message' => 'Taller eliminado'
+            );
         } else {
             $response = array(
                 'status' => 406,
@@ -137,7 +130,8 @@ class TallerController
         );
     }
     return response()->json($response, $response['status']);
-    }
+}
+
 
 
     public function paUpdate(Request $request, $id)

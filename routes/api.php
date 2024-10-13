@@ -6,6 +6,7 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\DetalleFacturaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ObraController;
+use App\Http\Controllers\TallerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +70,12 @@ Route::prefix('v1')->group(
         Route::get('/envio/{id}',[EnvioController::class,'show'])->middleware(ApiAuthMiddleware::class);
         Route::delete('/envio/{id}',[EnvioController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/envio/{id}',[EnvioController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+
+        Route::post('/taller/store',[TallerController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::get('/taller',[TallerController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -artist
+        Route::get('/taller/{id}',[TallerController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::delete('/taller/{id}',[TallerController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::put('/taller/{id}',[TallerController::class,'paUpdate'])->middleware(ApiAuthMiddleware::class);//admin-artist -
     }
 );
 
