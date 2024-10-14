@@ -10,4 +10,14 @@ class Taller extends Model
     use HasFactory;
 
     protected $table = "talleres";
+
+
+    protected static $categoriaTaller = [
+        '3D',
+        'Photograph',
+        'Fashion',
+        'Art',
+        'UI-UX',
+    ];
+
 }
