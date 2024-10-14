@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\JwtAuth;
-use App\Models\detalleFactura;
+
+//use App\Models\detalleFactura;
 use Illuminate\Support\Facades\DB;
+use App\Models\DetalleFactura;
 
 class DetalleFacturaController
 {

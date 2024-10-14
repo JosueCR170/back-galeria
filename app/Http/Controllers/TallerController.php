@@ -134,7 +134,7 @@ class TallerController
 
 
 
-    public function paUpdate(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $jwt = new JwtAuth();
         $sessionUser = $jwt->checkToken($request->header('bearertoken'), true);
