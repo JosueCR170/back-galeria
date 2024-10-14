@@ -4,6 +4,8 @@ use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\DetalleFacturaController;
+use App\Http\Controllers\MatriculaController;
+use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\TallerController;
@@ -71,11 +73,26 @@ Route::prefix('v1')->group(
         Route::delete('/envio/{id}',[EnvioController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/envio/{id}',[EnvioController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
 
+        //Taller
         Route::post('/taller/store',[TallerController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-artist -
         Route::get('/taller',[TallerController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -artist
         Route::get('/taller/{id}',[TallerController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::delete('/taller/{id}',[TallerController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
-        Route::put('/taller/{id}',[TallerController::class,'paUpdate'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::put('/taller/{id}',[TallerController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+
+        //Matricula
+        Route::post('/matricula/store',[MatriculaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::get('/matricula',[MatriculaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -artist
+        Route::get('/matricula/{id}',[MatriculaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::delete('/matricula/{id}',[MatriculaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::put('/matricula/{id}',[MatriculaController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+
+        //Oferta
+        Route::post('/oferta/store',[OfertaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::get('/oferta',[OfertaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -artist
+        Route::get('/oferta/{id}',[OfertaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::delete('/oferta/{id}',[OfertaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
+        Route::put('/oferta/{id}',[OfertaController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
     }
 );
 
