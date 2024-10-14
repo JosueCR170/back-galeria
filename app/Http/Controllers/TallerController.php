@@ -38,58 +38,59 @@ class TallerController
 
 
     public function store(Request $request)
-    {
-        $data_input = $request->input('data', null);
-        if ($data_input) {
-            $data = json_decode($data_input, true);
-            if ($data !== null) {
-                $data = array_map('trim', $data);
-                $categoriaTaller = Taller::getCategoria();
-                $rules = [
-                    'nombre' => 'required|string|max:50',
-                    'descripcion' => 'required|string|max:255',
-                    'duracion' => 'required|numeric',
-                    'idArtista' => 'required | integer | exists:artista, id',
-                    'categoria' => ['required', Rule::in($categoriaTaller)],
-                    'costo' => 'required|numeric',
+{
+    $data_input = $request->input('data', null);
+    if ($data_input) {
+        $data = json_decode($data_input, true);
+        if ($data !== null) {
+            $data = array_map('trim', $data);
+            $categoriaTaller = Taller::getCategoriaTaller();  // Corregido aquí
+            $rules = [
+                'idArtista' => 'required|integer|exists:artista,id',
+                'nombre' => 'required|string|max:50',
+                'descripcion' => 'required|string|max:255',
+                'duracion' => 'required|numeric',
+                'costo' => 'required|numeric',
+                'categoria' => ['required', Rule::in($categoriaTaller)],
+            ];
+            $validator = Validator::make($data, $rules);
+            if (!$validator->fails()) {
+                $idArtista = $data['idArtista'];
+                $nombre = $data['nombre'];
+                $descripcion = $data['descripcion'];
+                $duracion = (float) $data['duracion'];
+                $costo = (float) $data['costo'];
+                $categoria = $data['categoria'];
+                DB::statement(
+                    'EXEC paInsertarTaller ?, ?, ?, ?, ?, ?',
+                    [$idArtista, $nombre, $descripcion, $duracion, $costo, $categoria]
+                );
+                $response = [
+                    'status' => 201,
+                    'message' => 'Taller creado exitosamente'
                 ];
-                $validator = Validator::make($data, $rules);
-                if (!$validator->fails()) {
-                    $nombre = $data['nombre'];
-                    $descripcion = $data['descripcion'];
-                    $duracion = (float) $data['duracion'];
-                    $idArtista = $data['idArtista'];
-                    $categoria = $data['categoria'];
-                    $costo = (float) $data['costo'];
-                    DB::statement(
-                        'EXEC paInsertarTaller ?, ?, ?, ?, ?, ?',
-                        [$nombre, $descripcion, $duracion, $idArtista, $categoria, $costo]
-                    );
-                    $response = [
-                        'status' => 201,
-                        'message' => 'Taller creado exitosamente'
-                    ];
-                } else {
-                    $response = [
-                        'status' => 406,
-                        'message' => 'Datos inválidos',
-                        'error' => $validator->errors()
-                    ];
-                }
             } else {
                 $response = [
-                    'status' => 400,
-                    'message' => 'No se proporcionaron datos válidos',
+                    'status' => 406,
+                    'message' => 'Datos inválidos',
+                    'error' => $validator->errors()
                 ];
             }
         } else {
             $response = [
                 'status' => 400,
-                'message' => 'No se encontró el objeto de datos (data)'
+                'message' => 'No se proporcionaron datos válidos',
             ];
         }
-        return response()->json($response, $response['status']);
+    } else {
+        $response = [
+            'status' => 400,
+            'message' => 'No se encontró el objeto de datos (data)'
+        ];
     }
+    return response()->json($response, $response['status']);
+}
+
 
 
     public function index(Request $request)
@@ -169,7 +170,7 @@ class TallerController
             ];
             return response()->json($response, $response['status']);
         }
-        $categoriaTaller = Taller::getCategoria();
+        $categoriaTaller = Taller::getCategoriaTaller();
         $rules = [
             'nombre' => 'string|max:50',
             'descripcion' => 'string|max:255',
@@ -190,11 +191,10 @@ class TallerController
         }
         $nombre = isset($data_input['nombre']) ? $data_input['nombre'] : $taller->nombre;
         $descripcion = isset($data_input['descripcion']) ? $data_input['descripcion'] : $taller->descripcion;
-        $duracion = isset($data_input['duracion']) ? $data_input['duracion'] : $taller->duracion;
+        $duracion = isset($data_input['duracion']) ? (float)$data_input['duracion'] : (float)$taller->duracion;
+        $costo = isset($data_input['costo']) ? (float)$data_input['costo'] : (float)$taller->costo;
         $categoria = isset($data_input['categoria']) ? $data_input['categoria'] : $taller->categoria;
-        $costo = isset($data_input['costo']) ? $data_input['costo'] : $taller->costo;
-    
-        DB::statement('EXEC paActualizarTaller ?, ?, ?, ?, ?, ?', [$id, $nombre, $descripcion, $duracion, $categoria, $costo]);
+        DB::statement('EXEC paActualizarTaller ?, ?, ?, ?, ?, ?', [$id, $nombre, $descripcion, $duracion, $costo, $categoria]);
     
         $response = [
             'status' => 201,
