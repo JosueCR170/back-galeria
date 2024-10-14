@@ -11,10 +11,6 @@ class Oferta extends Model
     
     protected $table = "ofertas";
 
-    public function artista(){
-        return $this->belongsTo(Artista::class, 'id');
-    }
-
     public function taller(){
         return $this->belongsTo(Taller::class, 'id');
     }

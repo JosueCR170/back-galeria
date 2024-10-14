@@ -58,27 +58,28 @@ class OfertaController
             if ($data !== null) {
                 $data = array_map('trim', $data);
                 $rules = [
-                    'idArtista' => 'required|integer|exists:artista,id',
                     'idTaller' => 'required|integer|exists:talleres,id',
                     'fechaInicio' => 'required|date',
                     'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
-                    'costo' => 'required|numeric|min:0',
+                    'horaInicio' => 'required|time',
+                    'horaFinal' => 'required|time|after_or_equal:horaInicio',
                     'ubicacion' => 'required|string|max:255',
                     'modalidad' => 'required|string|max:20'
                 ];
                 $validator = validator($data, $rules);
                 if (!$validator->fails()) {
-                    $idArtista = $data['idArtista'];
                     $idTaller = $data['idTaller'];
                     $fechaInicio = $data['fechaInicio'];
                     $fechaFinal = $data['fechaFinal'];
+                    $horaInicio = $data['horaInicio'];
+                    $horaFinal = $data['horaFinal'];
                     $costo = $data['costo'];
                     $ubicacion = $data['ubicacion'];
                     $modalidad = $data['modalidad'];
 
                     DB::statement(
-                        'EXEC paInsertarOfertas ?, ?, ?, ?, ?, ?, ?',
-                        [$idArtista, $idTaller, $fechaInicio, $fechaFinal, $costo, $ubicacion, $modalidad]
+                        'EXEC paInsertarOfertas ?, ?, ?, ?, ?, ?, ? , ?',
+                        [$idTaller, $fechaInicio, $fechaFinal, $horaInicio, $horaFinal, $costo, $ubicacion, $modalidad]
                     );
 
                     $response = [
@@ -138,11 +139,11 @@ class OfertaController
         }
 
         $rules = [
-            'idArtista' => 'required|integer',
             'idTaller' => 'required|integer',
             'fechaInicio' => 'required|date',
             'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
-            'costo' => 'required|numeric|min:0',
+            'horaInicio' => 'required|time',
+            'horaFinal' => 'required|time|after_or_equal:horaInicio',
             'ubicacion' => 'required|string|max:255',
             'modalidad' => 'required|string|max:20',
         ];
@@ -165,13 +166,13 @@ class OfertaController
             ], 404);
         }
 
-        DB::statement('EXEC paActualizarOfertas ?, ?, ?, ?, ?, ?, ?', [
+        DB::statement('EXEC paActualizarOfertas ?, ?, ?, ?, ?, ?, ?, ?', [
             $id,
-            $data_input['idArtista'],
             $data_input['idTaller'],
             $data_input['fechaInicio'],
             $data_input['fechaFinal'],
-            $data_input['costo'],
+            $data_input['horaInicio'],
+            $data_input['horaFinal'],
             $data_input['ubicacion'],
             $data_input['modalidad']
         ]);
@@ -181,7 +182,4 @@ class OfertaController
             'message' => 'Oferta actualizada exitosamente'
         ], 200);
     }
-
-
-
 }

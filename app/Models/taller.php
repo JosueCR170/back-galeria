@@ -10,4 +10,8 @@ class Taller extends Model
     use HasFactory;
 
     protected $table = "talleres";
+
+    public function artista(){
+        return $this->belongsTo(Artista::class, 'id');
+    }
 }
