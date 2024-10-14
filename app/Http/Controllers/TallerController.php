@@ -5,6 +5,7 @@ use App\Helpers\JwtAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use App\Models\taller;
 class TallerController
 {
@@ -43,6 +44,7 @@ class TallerController
             $data = json_decode($data_input, true);
             if ($data !== null) {
                 $data = array_map('trim', $data);
+                $categoriaTaller = Taller::getCategoria();
                 $rules = [
                     'nombre' => 'required|string|max:50',
                     'descripcion' => 'required|string|max:255',

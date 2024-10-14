@@ -23,5 +23,5 @@ class Taller extends Model
         'UI-UX',
     ];
 
-
+    public static function getCategoriaTaller(){return self::$categoriaTaller;}
 }
