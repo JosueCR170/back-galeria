@@ -14,4 +14,14 @@ class Taller extends Model
     public function artista(){
         return $this->belongsTo(Artista::class, 'id');
     }
+
+    protected static $categoriaTaller = [
+        '3D',
+        'Photograph',
+        'Fashion',
+        'Art',
+        'UI-UX',
+    ];
+
+
 }

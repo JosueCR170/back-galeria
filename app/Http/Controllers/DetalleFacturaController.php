@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\JwtAuth;
+
+//use App\Models\detalleFactura;
+use Illuminate\Support\Facades\DB;
 use App\Models\DetalleFactura;
 
 class DetalleFacturaController
@@ -79,17 +82,18 @@ class DetalleFacturaController
             ];
             $isValid = \validator($data, $rules);
             if (!$isValid->fails()) {
-                $detalleFactura = new detalleFactura();
-               
-                $detalleFactura->idFactura = $data['idFactura'];
-                $detalleFactura->idObra = $data['idObra'];
-                $detalleFactura->subtotal = $data['subtotal'];
+                
+                $idFactura = $data['idFactura'];
+                $idObra = $data['idObra'];
+                $subtotal = (float) $data['subtotal'];
 
-                $detalleFactura->save();
+                DB::statement(
+                    'EXEC paInsertarDetallesFactura ?, ?, ?',
+                    [$idFactura, $idObra, $subtotal]
+                );
                 $response = array(
                     'status' => 201,
-                    'message' => 'Detalle Factura guardado',
-                    'Factura' => $detalleFactura
+                    'message' => 'Detalle Factura guardado'
                 );
             } else {
                 $response = array(

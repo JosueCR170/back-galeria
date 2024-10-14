@@ -47,6 +47,8 @@ class TallerController
                     'nombre' => 'required|string|max:50',
                     'descripcion' => 'required|string|max:255',
                     'duracion' => 'required|numeric',
+                    'idArtista' => 'required | integer | exists:artista, id',
+                    'categoria' => ['required', Rule::in($categoriaTaller)],
                     'costo' => 'required|numeric',
                 ];
                 $validator = Validator::make($data, $rules);
@@ -54,11 +56,12 @@ class TallerController
                     $nombre = $data['nombre'];
                     $descripcion = $data['descripcion'];
                     $duracion = (float) $data['duracion'];
+                    $idArtista = $data['idArtista'];
+                    $categoria = $data['categoria'];
                     $costo = (float) $data['costo'];
-                    
                     DB::statement(
-                        'EXEC paInsertarTaller ?, ?, ?, ?',
-                        [$nombre, $descripcion, $duracion, $costo]
+                        'EXEC paInsertarTaller ?, ?, ?, ?, ?, ?',
+                        [$nombre, $descripcion, $duracion, $idArtista, $categoria, $costo]
                     );
                     $response = [
                         'status' => 201,
@@ -96,7 +99,7 @@ class TallerController
             'message' => 'No tienes permiso de administrador'
         );
     } else {
-        $data = DB::select('select id, nombre, descripcion, duracion, costo from vMostrarTodosTalleres');
+        $data = DB::select('select id, nombre, descripcion, duracion, idArtista, categoria, costo from vMostrarTodosTalleres');
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de los talleres",
@@ -168,6 +171,7 @@ class TallerController
             'nombre' => 'string|max:50',
             'descripcion' => 'string|max:255',
             'duracion' => 'numeric',
+            'categoria' => '[Rule::in($categoriaTaller)]',
             'costo' => 'numeric'
         ];
     
@@ -184,9 +188,10 @@ class TallerController
         $nombre = isset($data_input['nombre']) ? $data_input['nombre'] : $taller->nombre;
         $descripcion = isset($data_input['descripcion']) ? $data_input['descripcion'] : $taller->descripcion;
         $duracion = isset($data_input['duracion']) ? $data_input['duracion'] : $taller->duracion;
+        $categoria = isset($data_input['categoria']) ? $data_input['categoria'] : $taller->categoria;
         $costo = isset($data_input['costo']) ? $data_input['costo'] : $taller->costo;
     
-        DB::statement('EXEC paActualizarTaller ?, ?, ?, ?, ?', [$id, $nombre, $descripcion, $duracion, $costo]);
+        DB::statement('EXEC paActualizarTaller ?, ?, ?, ?, ?, ?', [$id, $nombre, $descripcion, $duracion, $categoria, $costo]);
     
         $response = [
             'status' => 201,
