@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detalles_factura', function (Blueprint $table) {
+        Schema::create('detallesFactura', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('idFactura')
@@ -27,7 +27,6 @@ return new class extends Migration
             ->cascadeOnDelete();
 
             $table->float('subtotal');
-            $table->timestamps();
         });
     }
 
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('detalles_factura');
+        Schema::dropIfExists('detallesFactura');
     }
 };

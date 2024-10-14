@@ -9,13 +9,15 @@ class DetalleFactura extends Model
 {
     use HasFactory;
 
-    protected $table = "detallesFactura";
+    protected $table = "detallesfactura";
+    public $timestamps = false;
 
-    public function factura(){
-        return $this->belongsTo(Factura::class, 'id');
-    }
 
-    public function obra(){
-        return $this->belongsTo(Obra::class, 'id');
-    }
+    // public function factura(){
+    //     return $this->belongsTo(Factura::class, 'id');
+    // }
+
+    // public function obra(){
+    //     return $this->belongsTo(Obra::class, 'id');
+    // }
 }

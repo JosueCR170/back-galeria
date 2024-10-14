@@ -7,6 +7,7 @@ use App\Models\Factura;
 use App\Models\Obra;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FacturaController
 {
@@ -206,52 +207,68 @@ class FacturaController
         $data_input = $request->input('data', null);
         if ($data_input) {
             $data = json_decode($data_input, true);
-            $data = array_map('trim', $data);
-            $rules = [
-                'fecha' => 'required|date',
-            ];
-            $isValid = \validator($data, $rules);
-            if (!$isValid->fails()) {
-                $factura = new Factura();
-               
-                $factura->fecha = $data['fecha'];
-                $factura->total = $data['total'];
-
-                if ($UserVerified || $artistaVerified) {
-                    $idUsuario = $data['idUsuario'];
-                    if (!isset($idUsuario)) {
-                        $response = array(
-                            'status' => 400,
-                            'message' => 'No se encontró el id del usuario'
-                        );
-                        return response()->json($response, $response['status']);
+            if ($data !== null) {
+                $data = array_map('trim', $data);
+                $rules = [
+                    'fecha' => 'required|date',
+                    'total' => 'required|numeric',
+                ];
+                $validator = validator($data, $rules);
+                if (!$validator->fails()) {
+                    if ($UserVerified || $artistaVerified) {
+                        $idUsuario = $data['idUsuario'] ?? null;
+                        if (!isset($idUsuario)) {
+                            return response()->json([
+                                'status' => 400,
+                                'message' => 'No se encontró el id del usuario'
+                            ], 400);
+                        }
+                    } else {
+                        $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->iss;
                     }
-                } else {
-                    $idUsuario = $jwt->checkToken($request->header('bearertoken'), true)->iss;
-                }
-                $factura->idUsuario = $idUsuario;
 
-                $factura->save();
-                $response = array(
-                    'status' => 201,
-                    'message' => 'Factura guardada',
-                    'Factura' => $factura
-                );
+                    $fecha = $data['fecha'];
+                    $total = $data['total'];
+
+                    DB::statement(
+                        'EXEC paInsertarFactura ?, ?, ?',
+                        [$idUsuario, $fecha, $total]
+                    );
+                    $factura=(array)DB::select('SELECT TOP 1 * FROM dbo.facturas WHERE idUsuario = ? ORDER BY id DESC', [$idUsuario]);
+                    
+                    if (!empty($factura)) {
+                        $factura = (array) $factura[0]; // Convierte el primer resultado en un array asociativo
+                    } else {
+                        $factura = null; // En caso de que no haya resultados
+                    }
+
+                    $response = [
+                        'status' => 201,
+                        'message' => 'Factura creada exitosamente',
+                        'factura' => $factura 
+                    ];
+                } else {
+                    $response = [
+                        'status' => 406,
+                        'message' => 'Datos inválidos',
+                        'errors' => $validator->errors()
+                    ];
+                }
             } else {
-                $response = array(
-                    'status' => 406,
-                    'message' => 'Datos inválidos',
-                    'errors' => $isValid->errors()
-                );
+                $response = [
+                    'status' => 400,
+                    'message' => 'No se proporcionaron datos válidos',
+                ];
             }
         } else {
-            $response = array(
+            $response = [
                 'status' => 400,
-                'message' => 'No se encontró el objeto data'
-            );
+                'message' => 'No se encontró el objeto de datos (data)'
+            ];
         }
         return response()->json($response, $response['status']);
     }
+
 
     // public function update(Request $request, $id)
     // {
