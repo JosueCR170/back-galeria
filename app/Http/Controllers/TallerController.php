@@ -169,11 +169,12 @@ class TallerController
             ];
             return response()->json($response, $response['status']);
         }
+        $categoriaTaller = Taller::getCategoria();
         $rules = [
             'nombre' => 'string|max:50',
             'descripcion' => 'string|max:255',
             'duracion' => 'numeric',
-            'categoria' => '[Rule::in($categoriaTaller)]',
+            'categoria' => Rule::in($categoriaTaller),
             'costo' => 'numeric'
         ];
     
