@@ -31,7 +31,7 @@ class OfertaController
 
     public function index(Request $request)
     {
-        $data = DB::select('SELECT * FROM vMostrarTodasOfertas');
+        $data = DB::select('SELECT * FROM vMostrarTodosOfertas');
 
         if (!empty($data)) {
             $response = [
