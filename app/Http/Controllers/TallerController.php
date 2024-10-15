@@ -44,7 +44,7 @@ class TallerController
         $data = json_decode($data_input, true);
         if ($data !== null) {
             $data = array_map('trim', $data);
-            $categoriaTaller = Taller::getCategoriaTaller();  // Corregido aquí
+            $categoriaTaller = Taller::getCategoriaTaller();  
             $rules = [
                 'idArtista' => 'required|integer|exists:artista,id',
                 'nombre' => 'required|string|max:50',
