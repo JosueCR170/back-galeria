@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class ArtistaController
 {
-    //
 
     public function index()
     {

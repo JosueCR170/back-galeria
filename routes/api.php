@@ -36,6 +36,7 @@ Route::prefix('v1')->group(
         
         //Obra
         Route::get('/obra',[ObraController::class,'index']);//-
+        Route::get('/obra/artista/{id}',[ObraController::class,'indexByArtistId']);
         Route::get('/obra/categorias',[ObraController::class,'getCategoria']);
         Route::get('/obra/tecnicas',[ObraController::class,'getTecnica']);
         Route::get('/obra/{id}',[ObraController::class,'show']);//-

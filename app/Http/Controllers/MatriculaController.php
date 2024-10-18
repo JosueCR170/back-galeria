@@ -50,6 +50,7 @@ class MatriculaController
                 $rules = [
                     'idUsuario' => 'required|numeric|exists:users,id',
                     'idOferta' => 'required|numeric|exists:ofertas,id',
+                    'costo' => 'required|numeric',
                     'fechaMatricula' => 'required|date',
                 ];
                 $validator = validator($data, $rules);
@@ -57,10 +58,11 @@ class MatriculaController
                     $idUsuario = (int) $data['idUsuario'];
                     $idOferta = (int) $data['idOferta'];
                     $fechaMatricula = $data['fechaMatricula'];
+                    $costo = (float) $data['costo'];
 
                     DB::statement(
-                        'EXEC paInsertarMatricula ?, ?, ?',
-                        [$idUsuario, $idOferta, $fechaMatricula]
+                        'EXEC paInsertarMatricula ?, ?, ?, ?',
+                        [$idUsuario, $idOferta, $costo, $fechaMatricula]
                     );
 
                     $response = [
@@ -134,6 +136,7 @@ class MatriculaController
         $rules = [
             'idUsuario' => 'nullable|numeric|exists:users,id',
             'idOferta' => 'nullable|numeric|exists:ofertas,id',
+            'costo' => 'required|numeric',
             'fechaMatricula' => 'nullable|date'
         ];
 
@@ -150,9 +153,10 @@ class MatriculaController
 
         $idUsuario = isset($data_input['idUsuario']) ? $data_input['idUsuario'] : $matricula->idUsuario;
         $idOferta = isset($data_input['idOferta']) ? $data_input['idOferta'] : $matricula->idOferta;
+        $costo = isset($data_input['costo']) ? $data_input['costo'] : $matricula->costo;
         $fechaMatricula = isset($data_input['fechaMatricula']) ? $data_input['fechaMatricula'] : $matricula->fechaMatricula;
 
-        DB::statement('EXEC paActualizarMatricula ?, ?, ?, ?', [$id, $idUsuario, $idOferta, $fechaMatricula]);
+        DB::statement('EXEC paActualizarMatricula ?, ?, ?, ?, ?', [$id, $idUsuario, $idOferta, $costo, $fechaMatricula]);
 
         $response = [
             'status' => 201,
