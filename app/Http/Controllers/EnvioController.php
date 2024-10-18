@@ -45,7 +45,7 @@ class EnvioController
              $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
              $detalles = DetalleFactura::whereIn('idObra', $obras)->pluck('idFactura');
 
-             $facturas = Factura::whereIn('idObra', $detalles)->pluck('id');
+             $facturas = Factura::whereIn('id', $detalles)->pluck('id');
              $data = Envio::whereIn('idFactura', $facturas)->get();
 
          }
