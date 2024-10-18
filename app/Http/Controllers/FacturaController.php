@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
 use App\Models\Factura;
+use App\Models\DetalleFactura;
 use App\Models\Obra;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -87,14 +88,18 @@ class FacturaController
     //NO USARLO
     public function indexByArtistId($id)
 {
-    $obras = Obra::where('idArtista', $id)
-        ->with(['detallesFactura.factura'])
-        ->get();
+    // $obras = Obra::where('idArtista', $id)
+    //     ->with(['detallesFactura.factura'])
+    //     ->get();
 
-    $facturas = [];
+    // $facturas = [];
     
-    $facturas=$obras;
+    // $facturas=$obras;
+    $obras = Obra::where('idArtista', $id)->pluck('id');
+    $detalles = DetalleFactura::whereIn('idObra', $obras)->pluck('idFactura');
 
+    $facturas = Factura::whereIn('id', $detalles)->get();
+    //$facturas = Factura::where('idArtista', $id);
     
     $response = [
         "status" => 200,
