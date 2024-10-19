@@ -365,4 +365,19 @@ class ObraController
 
     }
 
+    public function indexByArtistId($id)
+    {
+    $data = Obra::where('idArtista', $id)
+        ->with('artista', 'detallesFactura.factura')
+        ->get();
+
+    $response = array(
+        "status" => 200,
+        "message" => "Todas las obras del artista con sus facturas",
+        "data" => $data
+    );
+
+    return response()->json($response, 200);
+    }
+
 }

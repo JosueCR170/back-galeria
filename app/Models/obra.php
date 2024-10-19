@@ -54,5 +54,9 @@ class Obra extends Model
         return $this->belongsTo(Artista::class, 'idArtista');
     }
 
+    public function detallesFactura(){
+        return $this->belongsTo(DetalleFactura::class, 'idObra');
+    }
+
     
 }
