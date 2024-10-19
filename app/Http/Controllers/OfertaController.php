@@ -75,10 +75,11 @@ class OfertaController
                     'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
                     'horaInicio' => 'required|date_format:H:i',
                     'horaFinal' => 'required|date_format:H:i|after_or_equal:horaInicio',
-                    'ubicacion' => 'required|string|max:255',
+                    'ubicacion' => 'string|max:255',  
                     'modalidad' => 'required|string|max:20',
                     'cupos' => 'required|integer',
                 ];
+                
 
                 $validator = Validator::make($data, $rules);
                 if (!$validator->fails()) {
@@ -185,7 +186,7 @@ class OfertaController
         $jwt = new JwtAuth();
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
             if (isset($id)) {
-                DB::statement('EXEC paEliminarOfertas ?', [$id]);
+                DB::statement('EXEC paEliminarOferta ?', [$id]);
                 $response = [
                     'status' => 200,
                     'message' => 'Oferta eliminada exitosamente'
