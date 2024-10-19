@@ -148,7 +148,7 @@ class OfertaController
             'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
             'horaInicio' => 'required|date_format:H:i',
             'horaFinal' => 'required|date_format:H:i|after_or_equal:horaInicio',
-            'ubicacion' => 'required|string|max:255',
+            'ubicacion' => 'string|max:255',
             'modalidad' => 'required|string|max:20',
             'cupos' => 'required|integer',
         ];
@@ -163,7 +163,7 @@ class OfertaController
             ], 406);
         }
 
-        DB::statement('EXEC paActualizarOfertas ?, ?, ?, ?, ?, ?, ?, ?, ?', [
+        DB::statement('EXEC paActualizarOferta ?, ?, ?, ?, ?, ?, ?, ?, ?', [
             $id,
             $data_input['idTaller'],
             $data_input['fechaInicio'],
