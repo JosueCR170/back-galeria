@@ -37,6 +37,7 @@ Route::prefix('v1')->group(
         //Obra
         Route::get('/obra',[ObraController::class,'index']);//-
         Route::get('/obra/artista/{id}',[ObraController::class,'indexByArtistId']);
+        Route::get('/obra/envio/{id}',[ObraController::class,'indexByEnvioId']);
         Route::get('/obra/categorias',[ObraController::class,'getCategoria']);
         Route::get('/obra/tecnicas',[ObraController::class,'getTecnica']);
         Route::get('/obra/{id}',[ObraController::class,'show']);//-
@@ -54,8 +55,8 @@ Route::prefix('v1')->group(
         //Factura
         Route::post('/factura/store',[FacturaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::get('/factura/artist/{id}',[FacturaController::class,'indexByArtistId']);//artist -
+        Route::get('/factura/{id}',[FacturaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -user
         Route::get('/factura',[FacturaController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
-        Route::get('/factura/{id}',[FacturaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::get('/factura/user/{id}',[FacturaController::class,'indexByUserId'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::post('/factura/showwithdate',[FacturaController::class,'showWithDate'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::delete('/factura/{id}',[FacturaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
@@ -69,7 +70,8 @@ Route::prefix('v1')->group(
         //Envio
         Route::post('/envio/store',[EnvioController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-user -
         Route::get('/envio',[EnvioController::class,'index'])->middleware(ApiAuthMiddleware::class);//admin -
-        Route::get('/envio/artist',[EnvioController::class,'indexByUser'])->middleware(ApiAuthMiddleware::class);//artist-user
+        Route::get('/envio/user/{id}',[EnvioController::class,'indexByUser']);//-user
+        Route::get('/envio/artist',[EnvioController::class,'indexByArtist'])->middleware(ApiAuthMiddleware::class);//artist-user
         Route::get('/envio/{id}',[EnvioController::class,'show'])->middleware(ApiAuthMiddleware::class);
         Route::delete('/envio/{id}',[EnvioController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin -
         Route::put('/envio/{id}',[EnvioController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -

@@ -35,7 +35,7 @@ class EnvioController
         return response()->json($response, 200);
     }
 
-    public function indexByUser(Request $request) //Por discutir
+    public function indexByArtist(Request $request) //Por discutir
     {
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
@@ -58,6 +58,25 @@ class EnvioController
             return response()->json($response, 404);
         }
 
+        $response = array(
+            "status" => 200,
+            "message" => "Todos los registros de envios",
+            "data" => $data
+        );
+        return response()->json($response, 200);
+    }
+
+    public function indexByUser($id) //Por discutir
+    {
+        $facturas = Factura::where('idUsuario', $id)->pluck('id');
+        $data = Envio::whereIn('idFactura', $facturas)->get();
+        if (!$data) {
+            $response = array(
+                "status" => 404,
+                "message" => "No se encontraron envios",
+            );
+            return response()->json($response, 404);
+        }
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de envios",

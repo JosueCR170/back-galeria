@@ -113,16 +113,12 @@ class FacturaController
 
     public function show(Request $request, $id)
     {
-        $jwt = new JwtAuth();
-        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
-        $UserVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
-        if ($UserVerified) {
             $data = Factura::find($id);
             if (is_object($data)) {
                 $response = array(
                     'status' => 200,
                     'message' => 'Datos de la factura',
-                    'Artista' => $data
+                    'data' => $data
                 );
             } else {
                 $response = array(
@@ -130,12 +126,7 @@ class FacturaController
                     'message' => 'Recurso no encontrado'
                 );
             }
-        } else {
-            $response = array(
-                'status' => 406,
-                'message' => 'No tienes permiso de administrador'
-            );
-        }
+       
         return response()->json($response, $response['status']);
     }
 

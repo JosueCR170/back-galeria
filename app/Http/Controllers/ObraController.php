@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Obra;
+use App\Models\Envio;
+use App\Models\DetalleFactura;
 use Illuminate\Http\Request;
 use App\Helpers\JwtAuth;
 use Illuminate\Http\Response;
@@ -375,6 +377,20 @@ class ObraController
         "status" => 200,
         "message" => "Todas las obras del artista con sus facturas",
         "data" => $data
+    );
+
+    return response()->json($response, 200);
+    }
+
+    public function indexByEnvioId($id)
+    {
+    $envios=Envio::Where('id',$id)->pluck('idFactura');
+    $detalles = DetalleFactura::whereIn('idFactura', $envios)->pluck('idObra');
+    $obras = Obra::whereIn('id', $detalles)->distinct()->get();
+    $response = array(
+        "status" => 200,
+        "message" => "Todas las obras del envio",
+        "data" => $obras
     );
 
     return response()->json($response, 200);
