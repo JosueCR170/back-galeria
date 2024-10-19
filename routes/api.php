@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FacturaController;
