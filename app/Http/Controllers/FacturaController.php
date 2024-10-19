@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
 use App\Models\Factura;
+use App\Models\DetalleFactura;
 use App\Models\Obra;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -60,6 +61,7 @@ class FacturaController
         return response()->json($response, 200);
     }
 
+    //ANTERIOR
     // public function indexByArtistId($id)
     // {
     //     $obras = Obra::where('idArtista', $id)->get();
@@ -81,22 +83,24 @@ class FacturaController
 
     //     return response()->json($response, 200);
     // }
+
+
+    //NO USARLO
     public function indexByArtistId($id)
 {
-    // Cargar todas las obras del artista junto con sus detalles de factura y facturas asociadas
-    $obras = Obra::where('idArtista', $id)
-        ->with(['detallesFactura.factura'])
-        ->get();
+    // $obras = Obra::where('idArtista', $id)
+    //     ->with(['detallesFactura.factura'])
+    //     ->get();
 
-    $facturas = [];
+    // $facturas = [];
+    
+    // $facturas=$obras;
+    $obras = Obra::where('idArtista', $id)->pluck('id');
+    $detalles = DetalleFactura::whereIn('idObra', $obras)->pluck('idFactura');
 
-    // Iterar sobre las obras y obtener las facturas
-    foreach ($obras as $obra) {
-        foreach ($obra->detallesFactura as $detalle) {
-            $facturas[] = $detalle->factura;
-        }
-    }
-
+    $facturas = Factura::whereIn('id', $detalles)->get();
+    //$facturas = Factura::where('idArtista', $id);
+    
     $response = [
         "status" => 200,
         "message" => "Todos los registros de facturas del artista",
@@ -109,16 +113,12 @@ class FacturaController
 
     public function show(Request $request, $id)
     {
-        $jwt = new JwtAuth();
-        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
-        $UserVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
-        if ($UserVerified) {
             $data = Factura::find($id);
             if (is_object($data)) {
                 $response = array(
                     'status' => 200,
                     'message' => 'Datos de la factura',
-                    'Artista' => $data
+                    'data' => $data
                 );
             } else {
                 $response = array(
@@ -126,12 +126,7 @@ class FacturaController
                     'message' => 'Recurso no encontrado'
                 );
             }
-        } else {
-            $response = array(
-                'status' => 406,
-                'message' => 'No tienes permiso de administrador'
-            );
-        }
+       
         return response()->json($response, $response['status']);
     }
 

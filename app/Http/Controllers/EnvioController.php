@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
+use App\Models\DetalleFactura;
 use App\Models\Envio;
 use App\Models\Factura;
 use App\Models\Obra;
@@ -34,19 +35,20 @@ class EnvioController
         return response()->json($response, 200);
     }
 
-    public function indexByUser(Request $request) //Por discutir
+    public function indexByArtist(Request $request) //Por discutir
     {
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
         if ($artistaVerified) {
-            $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
-            $facturas = Factura::whereIn('idObra', $obras)->pluck('id');
-            $data = Envio::whereIn('idFactura', $facturas)->get();
-         } //else {
-        //     $facturas = Factura::where('idUsuario', $decodedToken->iss)->pluck('id');
-        //     $data = Envio::whereIn('idFactura', $facturas);
-        // }
+
+             $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
+             $detalles = DetalleFactura::whereIn('idObra', $obras)->pluck('idFactura');
+
+             $facturas = Factura::whereIn('id', $detalles)->pluck('id');
+             $data = Envio::whereIn('idFactura', $facturas)->get();
+
+         }
 
         if (!$data) {
             $response = array(
@@ -56,6 +58,25 @@ class EnvioController
             return response()->json($response, 404);
         }
 
+        $response = array(
+            "status" => 200,
+            "message" => "Todos los registros de envios",
+            "data" => $data
+        );
+        return response()->json($response, 200);
+    }
+
+    public function indexByUser($id) //Por discutir
+    {
+        $facturas = Factura::where('idUsuario', $id)->pluck('id');
+        $data = Envio::whereIn('idFactura', $facturas)->get();
+        if (!$data) {
+            $response = array(
+                "status" => 404,
+                "message" => "No se encontraron envios",
+            );
+            return response()->json($response, 404);
+        }
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de envios",
