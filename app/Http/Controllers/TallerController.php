@@ -38,117 +38,135 @@ class TallerController
 
 
     public function store(Request $request)
-{
-    $data_input = $request->input('data', null);
-    if ($data_input) {
-        $data = json_decode($data_input, true);
-        if ($data !== null) {
-            $data = array_map('trim', $data);
-            $categoriaTaller = Taller::getCategoriaTaller();  
-            $rules = [
-                'idArtista' => 'required|integer|exists:artista,id',
-                'nombre' => 'required|string|max:50',
-                'descripcion' => 'required|string|max:255',
-                'duracion' => 'required|numeric',
-                'costo' => 'required|numeric',
-                'categoria' => ['required', Rule::in($categoriaTaller)],
-            ];
-            $validator = Validator::make($data, $rules);
-            if (!$validator->fails()) {
-                $idArtista = $data['idArtista'];
-                $nombre = $data['nombre'];
-                $descripcion = $data['descripcion'];
-                $duracion = (float) $data['duracion'];
-                $costo = (float) $data['costo'];
-                $categoria = $data['categoria'];
-                DB::statement(
-                    'EXEC paInsertarTaller ?, ?, ?, ?, ?, ?',
-                    [$idArtista, $nombre, $descripcion, $duracion, $costo, $categoria]
-                );
-                $response = [
-                    'status' => 201,
-                    'message' => 'Taller creado exitosamente'
+    {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        
+        // Verificar si el usuario es admin o artista
+        if (!isset($decodedToken->tipoUsuario) && !isset($decodedToken->nombreArtista)) {
+            return response()->json([
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador o artista'
+            ], 406);
+        }
+    
+        $data_input = $request->input('data', null);
+        if ($data_input) {
+            $data = json_decode($data_input, true);
+            if ($data !== null) {
+                $data = array_map('trim', $data);
+                $categoriaTaller = Taller::getCategoriaTaller();  
+                $rules = [
+                    'idArtista' => 'required|integer|exists:artista,id',
+                    'nombre' => 'required|string|max:50',
+                    'descripcion' => 'required|string|max:255',
+                    'duracion' => 'required|numeric',
+                    'costo' => 'required|numeric',
+                    'categoria' => ['required', Rule::in($categoriaTaller)],
                 ];
+                $validator = Validator::make($data, $rules);
+                if (!$validator->fails()) {
+                    $idArtista = $data['idArtista'];
+                    $nombre = $data['nombre'];
+                    $descripcion = $data['descripcion'];
+                    $duracion = (float) $data['duracion'];
+                    $costo = (float) $data['costo'];
+                    $categoria = $data['categoria'];
+                    DB::statement(
+                        'EXEC paInsertarTaller ?, ?, ?, ?, ?, ?',
+                        [$idArtista, $nombre, $descripcion, $duracion, $costo, $categoria]
+                    );
+                    $response = [
+                        'status' => 201,
+                        'message' => 'Taller creado exitosamente'
+                    ];
+                } else {
+                    $response = [
+                        'status' => 406,
+                        'message' => 'Datos inválidos',
+                        'error' => $validator->errors()
+                    ];
+                }
             } else {
                 $response = [
-                    'status' => 406,
-                    'message' => 'Datos inválidos',
-                    'error' => $validator->errors()
+                    'status' => 400,
+                    'message' => 'No se proporcionaron datos válidos',
                 ];
             }
         } else {
             $response = [
                 'status' => 400,
-                'message' => 'No se proporcionaron datos válidos',
+                'message' => 'No se encontró el objeto de datos (data)'
             ];
         }
-    } else {
-        $response = [
-            'status' => 400,
-            'message' => 'No se encontró el objeto de datos (data)'
-        ];
+        return response()->json($response, $response['status']);
     }
-    return response()->json($response, $response['status']);
-}
-
-
-
+    
     public function index(Request $request)
     {
-    $jwt = new JwtAuth();
-    if (!$jwt->checkToken($request->header('bearertoken'))) {
-        $response = array(
-            'status' => 406,
-            'message' => 'No tienes permiso de administrador'
-        );
-    } else {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        
+        // Verificar si el usuario es admin o artista
+        if (!isset($decodedToken->tipoUsuario) && !isset($decodedToken->nombreArtista)) {
+            return response()->json([
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador o artista'
+            ], 406);
+        }
+    
         $data = DB::select('select id, nombre, descripcion, duracion, idArtista, categoria, costo from vMostrarTodosTalleres');
         $response = array(
             "status" => 200,
             "message" => "Todos los registros de los talleres",
             "data" => $data
         );
+        
+        return response()->json($response, 200);
     }
-    return response()->json($response, 200);
-    }
-
-
+    
     public function destroy(Request $request, $id)
-{
-    $jwt = new JwtAuth();
-    if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-        // Verificar si el taller tiene ofertas asociadas
-        $ofertas = DB::select('SELECT * FROM ofertas WHERE idTaller = ?', [$id]);
-
-        if (count($ofertas) > 0) {
-            // Si hay ofertas asociadas, no permitir la eliminación
+    {
+        $jwt = new JwtAuth();
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        
+        // Verificar si el usuario es admin o artista
+        if (!isset($decodedToken->tipoUsuario) && !isset($decodedToken->nombreArtista)) {
             return response()->json([
-                'status' => 400,
-                'message' => 'No se puede eliminar el taller, tiene ofertas asociadas'
-            ], 400);
-        } else {
-            // Si no hay ofertas, proceder con la eliminación del taller
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador o artista'
+            ], 406);
+        }
+    
+        if (isset($id)) {
             DB::statement('EXEC paEliminarTaller ?', [$id]);
-
-            return response()->json([
+            $response = [
                 'status' => 200,
                 'message' => 'Taller eliminado exitosamente'
-            ], 200);
+            ];
+        } else {
+            $response = [
+                'status' => 406,
+                'message' => 'Falta el identificador del taller a eliminar'
+            ];
         }
-    } else {
-        return response()->json([
-            'status' => 406,
-            'message' => 'No tienes permiso de administrador'
-        ], 406);
+    
+        return response()->json($response, $response['status']);
     }
-}
-
-
-
+    
     public function update(Request $request, $id)
     {
         $jwt = new JwtAuth();
-        $sessionUser = $jwt->checkToken($request->header('bearertoken'), true);
+        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+        
+        // Verificar si el usuario es admin o artista
+        if (!isset($decodedToken->tipoUsuario) && !isset($decodedToken->nombreArtista)) {
+            return response()->json([
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador o artista'
+            ], 406);
+        }
+    
         $taller = DB::table('talleres')->where('id', $id)->first();
         
         if (!$taller) {
@@ -158,13 +176,7 @@ class TallerController
             ];
             return response()->json($response, $response['status']);
         }
-        if (!$sessionUser->tipoUsuario) {
-            $response = [
-                'status' => 403,
-                'message' => 'No tienes permiso para actualizar este taller'
-            ];
-            return response()->json($response, $response['status']);
-        }
+    
         $data_input = $request->input('data', null);
         $data_input = json_decode($data_input, true);
     
@@ -175,6 +187,7 @@ class TallerController
             ];
             return response()->json($response, $response['status']);
         }
+    
         $categoriaTaller = Taller::getCategoriaTaller();
         $rules = [
             'nombre' => 'string|max:50',
@@ -194,20 +207,32 @@ class TallerController
             ];
             return response()->json($response, $response['status']);
         }
+    
         $nombre = isset($data_input['nombre']) ? $data_input['nombre'] : $taller->nombre;
         $descripcion = isset($data_input['descripcion']) ? $data_input['descripcion'] : $taller->descripcion;
         $duracion = isset($data_input['duracion']) ? (float)$data_input['duracion'] : (float)$taller->duracion;
         $costo = isset($data_input['costo']) ? (float)$data_input['costo'] : (float)$taller->costo;
         $categoria = isset($data_input['categoria']) ? $data_input['categoria'] : $taller->categoria;
+    
         DB::statement('EXEC paActualizarTaller ?, ?, ?, ?, ?, ?', [$id, $nombre, $descripcion, $duracion, $costo, $categoria]);
     
         $response = [
             'status' => 201,
-            'message' => 'Taller actualizado'
+            'message' => 'Taller actualizado exitosamente'
         ];
     
         return response()->json($response, $response['status']);
     }
     
+
+    public function getTalleresByArtist($id) {
+        $talleres = Taller::where('idArtista', $id)->get();
+        if ($talleres->isEmpty()) {
+            return response()->json(['message' => 'No talleres found for this artist.'], 404);
+        }
+        return response()->json(['data' => $talleres], 200);
+    }
+    
+
 
 }
