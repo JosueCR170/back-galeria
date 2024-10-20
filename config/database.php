@@ -106,12 +106,9 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
-<<<<<<< HEAD
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
-=======
-             //'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
 
->>>>>>> 567614d40dc9ef797b43df5616c1f8082d47206c
+
         ],
 
     ],

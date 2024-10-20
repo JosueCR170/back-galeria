@@ -117,25 +117,30 @@ class TallerController
 {
     $jwt = new JwtAuth();
     if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-        if (isset($id)) {
-            DB::statement('EXEC paEliminarTaller ?', [$id]);
-            $response = array(
-                'status' => 200,
-                'message' => 'Taller eliminado'
-            );
+        // Verificar si el taller tiene ofertas asociadas
+        $ofertas = DB::select('SELECT * FROM ofertas WHERE idTaller = ?', [$id]);
+
+        if (count($ofertas) > 0) {
+            // Si hay ofertas asociadas, no permitir la eliminación
+            return response()->json([
+                'status' => 400,
+                'message' => 'No se puede eliminar el taller, tiene ofertas asociadas'
+            ], 400);
         } else {
-            $response = array(
-                'status' => 406,
-                'message' => 'Falta el identificador del recurso a eliminar'
-            );
+            // Si no hay ofertas, proceder con la eliminación del taller
+            DB::statement('EXEC paEliminarTaller ?', [$id]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Taller eliminado exitosamente'
+            ], 200);
         }
     } else {
-        $response = array(
+        return response()->json([
             'status' => 406,
             'message' => 'No tienes permiso de administrador'
-        );
+        ], 406);
     }
-    return response()->json($response, $response['status']);
 }
 
 

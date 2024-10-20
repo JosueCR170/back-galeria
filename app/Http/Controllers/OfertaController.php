@@ -35,54 +35,45 @@ class OfertaController
     public function index(Request $request)
     {
         $data = DB::select('SELECT * FROM vMostrarTodosOfertas');
-
-        if (!empty($data)) {
             $response = [
                 'status' => 200,
                 'message' => 'Todas las ofertas disponibles',
                 'data' => $data
             ];
-        } else {
-            $response = [
-                'status' => 404,
-                'message' => 'No se encontraron ofertas'
-            ];
-        }
-
         return response()->json($response, $response['status']);
     }
 
 
     public function store(Request $request)
-    {
-        $jwt = new JwtAuth();
-        if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-            return response()->json([
-                'status' => 406,
-                'message' => 'No tienes permiso de administrador'
-            ], 406);
-        }
+{
+    $jwt = new JwtAuth();
+    if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+        return response()->json([
+            'status' => 406,
+            'message' => 'No tienes permiso de administrador'
+        ], 406);
+    }
 
-        $data_input = $request->input('data', null);
-        if ($data_input) {
-            $data = json_decode($data_input, true);
-            if ($data !== null) {
-                $data = array_map('trim', $data);
+    $data_input = $request->input('data', null);
+    if ($data_input) {
+        $data = json_decode($data_input, true);
+        if ($data !== null) {
+            $data = array_map('trim', $data);
 
-                $rules = [
-                    'idTaller' => 'required|integer|exists:talleres,id',
-                    'fechaInicio' => 'required|date',
-                    'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
-                    'horaInicio' => 'required|date_format:H:i',
-                    'horaFinal' => 'required|date_format:H:i|after_or_equal:horaInicio',
-                    'ubicacion' => 'string|max:255',  
-                    'modalidad' => 'required|string|max:20',
-                    'cupos' => 'required|integer',
-                ];
-                
+            $rules = [
+                'idTaller' => 'required|integer|exists:talleres,id',
+                'fechaInicio' => 'required|date',
+                'fechaFinal' => 'required|date|after_or_equal:fechaInicio',
+                'horaInicio' => 'required|date_format:H:i',
+                'horaFinal' => 'required|date_format:H:i|after_or_equal:horaInicio',
+                'ubicacion' => 'string|max:255',  
+                'modalidad' => 'required|string|max:20',
+                'cupos' => 'required|integer',
+            ];
 
-                $validator = Validator::make($data, $rules);
-                if (!$validator->fails()) {
+            $validator = Validator::make($data, $rules);
+            if (!$validator->fails()) {
+                try {
                     DB::statement(
                         'EXEC paInsertarOferta ?, ?, ?, ?, ?, ?, ?, ?',
                         [
@@ -100,27 +91,36 @@ class OfertaController
                         'status' => 201,
                         'message' => 'Oferta creada exitosamente'
                     ];
-                } else {
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Captura la excepción que puede lanzar el trigger
                     $response = [
-                        'status' => 406,
-                        'message' => 'Datos inválidos',
-                        'error' => $validator->errors()
+                        'status' => 400,
+                        'message' => 'Error al crear la oferta',
+                        'error' => $e->getMessage()  // Devuelve el mensaje del error
                     ];
                 }
             } else {
                 $response = [
-                    'status' => 400,
-                    'message' => 'No se proporcionaron datos válidos',
+                    'status' => 406,
+                    'message' => 'Datos inválidos',
+                    'error' => $validator->errors()
                 ];
             }
         } else {
             $response = [
                 'status' => 400,
-                'message' => 'No se encontró el objeto de datos (data)'
+                'message' => 'No se proporcionaron datos válidos',
             ];
         }
-        return response()->json($response, $response['status']);
+    } else {
+        $response = [
+            'status' => 400,
+            'message' => 'No se encontró el objeto de datos (data)'
+        ];
     }
+    return response()->json($response, $response['status']);
+}
+
 
     public function update(Request $request, $id)
     {
