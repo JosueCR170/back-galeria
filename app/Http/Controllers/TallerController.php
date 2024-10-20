@@ -96,7 +96,7 @@ class TallerController
     public function index(Request $request)
     {
     $jwt = new JwtAuth();
-    if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+    if (!$jwt->checkToken($request->header('bearertoken'))) {
         $response = array(
             'status' => 406,
             'message' => 'No tienes permiso de administrador'
