@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\AdministradorDBController;
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FacturaController;
@@ -95,6 +96,12 @@ Route::prefix('v1')->group(
         Route::get('/oferta/{id}',[OfertaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::delete('/oferta/{id}',[OfertaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::put('/oferta/{id}',[OfertaController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+
+        //AdminBD
+        Route::post('/adminBD/restore',[AdministradorDBController::class,'restoreBD'])->middleware(ApiAuthMiddleware::class);//admin
+        Route::post('/adminBD/backup',[AdministradorDBController::class,'backupBD'])->middleware(ApiAuthMiddleware::class);//admin
+    
+    
     }
 );
 
