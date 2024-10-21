@@ -95,32 +95,46 @@ public function restoreBD(Request $request)
 
 public function backupBD(Request $request)
 {
-    $jwt = new JwtAuth();
+    try {
+        $jwt = new JwtAuth();
 
-    if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
-        return response()->json([
-            'status' => 406,
-            'message' => 'No tienes permiso de administrador'
-        ], 406);
-    }
+        if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+            return response()->json([
+                'status' => 406,
+                'message' => 'No tienes permiso de administrador'
+            ], 406);
+        }
 
-    $backupPath = 'C:\SQLBackups';
-    $backupFileName = 'galeria_db_Backup.bak';
-    $fullPath = $backupPath . '\\' . $backupFileName;
-    if (!file_exists($backupPath)) {
-        mkdir($backupPath, 0777, true); 
-    }
-    DB::statement('EXEC paBackupGaleriaDB @backupPath = ?', [$backupPath]);
+        $backupPath = 'C:\SQLBackups';
 
-    if (file_exists($fullPath)) {
-        return response()->download($fullPath);  
-    } else {
+        if (!file_exists($backupPath)) {
+            mkdir($backupPath, 0777, true); 
+        }
+
+        DB::statement('EXEC paBackupGaleriaDB @backupPath = ?', [$backupPath]);
+
+        $files = glob($backupPath . '\*.bak');
+        $latestFile = array_reduce($files, function($a, $b) {
+            return filemtime($a) > filemtime($b) ? $a : $b;
+        });
+
+        if ($latestFile && file_exists($latestFile)) {
+            return response()->download($latestFile);  
+        }
+
         return response()->json([
             'status' => 404,
-            'message' => 'Error al generar el backup',
-            'nombre de archivo' => $fullPath
+            'message' => 'Error al generar el backup o archivo no encontrado',
         ], 404);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
+        ], 500);
     }
 }
+
+
 
 }
