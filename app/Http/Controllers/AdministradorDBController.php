@@ -62,6 +62,37 @@ public function restoreBD(Request $request)
     }
 }
 
+// public function backupBD(Request $request)
+// {
+//     $jwt = new JwtAuth();
+
+//     if (!$jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
+//         return response()->json([
+//             'status' => 406,
+//             'message' => 'No tienes permiso de administrador'
+//         ], 406);
+//     }
+//     $backupPath = 'C:\SQLBackups';
+//     $backupFileName = 'galeria_db_Backup_' . now()->format('Ymd_Hi') . '.bak';
+//     $fullPath = $backupPath . '\\' . $backupFileName;
+    
+//     if (!file_exists($backupPath)) {
+//         mkdir($backupPath, 0777, true); 
+//     }
+
+//     DB::statement('EXEC paBackupGaleriaDB @backupPath = ?',[$backupPath]);
+
+//     if (file_exists($fullPath)) {
+//         return response()->download($fullPath);  
+//     } else {
+//         return response()->json([
+//             'status' => 404,
+//             'message' => 'Error al generar el backup',
+//             'nombre de archivo'=>$fullPath
+//         ], 404);
+//     }
+// }
+
 public function backupBD(Request $request)
 {
     $jwt = new JwtAuth();
@@ -73,45 +104,23 @@ public function backupBD(Request $request)
         ], 406);
     }
 
-    $data_input = $request->input('data', null);
-    
-    if (!$data_input) {
-        return response()->json([
-            'status' => 400,
-            'message' => 'No se encontraron todos los datos necesarios'
-        ], 400);
+    $backupPath = 'C:\SQLBackups';
+    $backupFileName = 'galeria_db_Backup.bak';
+    $fullPath = $backupPath . '\\' . $backupFileName;
+    if (!file_exists($backupPath)) {
+        mkdir($backupPath, 0777, true); 
     }
+    DB::statement('EXEC paBackupGaleriaDB @backupPath = ?', [$backupPath]);
 
-    $data = json_decode($data_input, true);
-    $data = array_map('trim', $data);
-
-    $rules = [
-        'backupPath' => 'required|string',
-    ];
-
-    $validator = \Validator::make($data, $rules);
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => 406,
-            'message' => 'Error: verifica rellenar todos los datos',
-            'errors' => $validator->errors(),
-        ], 406);
-    }
-
-    $backupPath = $data['backupPath'];
-    $result = DB::statement('EXEC paBackupGaleriaDB @backupPath = ?', [$backupPath]);
-    if ($result) {
-        return response()->json([
-            'status' => 200,
-            'message' => 'Backup completado exitosamente.'
-        ], 200);
+    if (file_exists($fullPath)) {
+        return response()->download($fullPath);  
     } else {
         return response()->json([
             'status' => 404,
-            'message' => 'Error durante el backup. Recurso no encontrado.'
+            'message' => 'Error al generar el backup',
+            'nombre de archivo' => $fullPath
         ], 404);
     }
 }
-
 
 }

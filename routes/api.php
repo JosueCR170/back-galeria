@@ -82,6 +82,7 @@ Route::prefix('v1')->group(
         Route::get('/taller/{id}',[TallerController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::delete('/taller/{id}',[TallerController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::put('/taller/{id}',[TallerController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::get('taller/artist/{id}', [TallerController::class, 'getTalleresByArtist']);
 
         //Matricula
         Route::post('/matricula/store',[MatriculaController::class,'store'])->middleware(ApiAuthMiddleware::class);//admin-artist -
@@ -96,12 +97,14 @@ Route::prefix('v1')->group(
         Route::get('/oferta/{id}',[OfertaController::class,'show'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::delete('/oferta/{id}',[OfertaController::class,'destroy'])->middleware(ApiAuthMiddleware::class);//admin - artist
         Route::put('/oferta/{id}',[OfertaController::class,'update'])->middleware(ApiAuthMiddleware::class);//admin-artist -
+        Route::get('/ofertas/artista', [OfertaController::class, 'indexfiltrado']);
 
         //AdminBD
-        Route::post('/adminBD/restore',[AdministradorDBController::class,'restoreBD'])->middleware(ApiAuthMiddleware::class);//admin
-        Route::post('/adminBD/backup',[AdministradorDBController::class,'backupBD'])->middleware(ApiAuthMiddleware::class);//admin
+        Route::get('/admin/backup',[AdministradorDBController::class,'backupBD'])->middleware(ApiAuthMiddleware::class);//admin
+        Route::post('/admin/restore',[AdministradorDBController::class,'restoreBD'])->middleware(ApiAuthMiddleware::class);//admin
     
-    
+
+
     }
 );
 
