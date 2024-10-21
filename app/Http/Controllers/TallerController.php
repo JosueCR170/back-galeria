@@ -227,10 +227,12 @@ class TallerController
 
     public function getTalleresByArtist($id) {
         $talleres = Taller::where('idArtista', $id)->get();
-        if ($talleres->isEmpty()) {
-            return response()->json(['message' => 'No talleres found for this artist.'], 404);
-        }
-        return response()->json(['data' => $talleres], 200);
+            $response = array(
+                "status" => 200,
+                "message" => "Todos los talleres del artista",
+                "data" => $talleres
+            );
+            return response()->json($response, 200);
     }
     
 
