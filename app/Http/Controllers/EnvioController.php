@@ -40,6 +40,7 @@ class EnvioController
         $jwt = new JwtAuth();
         $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
         $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+        $data=[];
         if ($artistaVerified) {
 
              $obras = Obra::where('idArtista', $decodedToken->iss)->pluck('id');
@@ -50,13 +51,13 @@ class EnvioController
 
          }
 
-        if (!$data) {
-            $response = array(
-                "status" => 404,
-                "message" => "No se encontraron envios",
-            );
-            return response()->json($response, 404);
-        }
+        // if (Empty($data)) {
+        //     $response = array(
+        //         "status" => 404,
+        //         "message" => "No se encontraron envios",
+        //     );
+        //     return response()->json($response, 404);
+        // }
 
         $response = array(
             "status" => 200,

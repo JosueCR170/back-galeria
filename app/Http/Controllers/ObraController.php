@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Helpers\JwtAuth;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class ObraController
 {
@@ -96,37 +97,40 @@ class ObraController
         return response()->json($response, $response['status']);
     }
     public function store(Request $request)
-    {
-        $jwt = new JwtAuth();
-        $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
-        $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
-        $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
+{
+    $jwt = new JwtAuth();
+    $decodedToken = $jwt->checkToken($request->header('bearertoken'), true);
+    $adminVerified = isset($decodedToken->tipoUsuario) ? $decodedToken->tipoUsuario : null;
+    $artistaVerified = isset($decodedToken->nombreArtista) ? $decodedToken->nombreArtista : null;
 
-        if ($adminVerified !== null || $artistaVerified !== null) {
-            $data_input = $request->input('data', null);
+    if ($adminVerified !== null || $artistaVerified !== null) {
+        $data_input = $request->input('data', null);
 
-            if ($data_input) {
-                $data = json_decode($data_input, true);
-                $data = array_map('trim', $data);
+        if ($data_input) {
+            $data = json_decode($data_input, true);
+            $data = array_map('trim', $data);
 
-                $tecnica = Obra::getTecnica();
-                $categoria = Obra::getCategoria();
-                $rules = [
-                    'idArtista' => 'required',
-                    'tecnica' => ['required', Rule::in($tecnica)],
-                    'nombre' => 'required|string',
-                    'tamano' => 'required|string',
-                    'precio' => 'required|decimal:0,2',
-                    'disponibilidad' => 'required|boolean',
-                    'categoria' => ['required', Rule::in($categoria)],
-                    'imagen' => 'required|string',
-                    'fechaCreacion' => 'required|date',
-                    'fechaRegistro' => 'required|date'
-                ];
-                $isValid = \validator($data, $rules);
-                if (!$isValid->fails()) {
+            $tecnica = Obra::getTecnica();
+            $categoria = Obra::getCategoria();
+            $rules = [
+                'idArtista' => 'required',
+                'tecnica' => ['required', Rule::in($tecnica)],
+                'nombre' => 'required|string',
+                'tamano' => 'required|string',
+                'precio' => 'required|decimal:0,2',
+                'disponibilidad' => 'required|boolean',
+                'categoria' => ['required', Rule::in($categoria)],
+                'imagen' => 'required|string',
+                'fechaCreacion' => 'required|date',
+                'fechaRegistro' => 'required|date'
+            ];
+
+            $isValid = \validator($data, $rules);
+            if (!$isValid->fails()) {
+                try {
+                    DB::beginTransaction(); // Inicia la transacción
+
                     $obra = new Obra();
-
                     $obra->idArtista = $data['idArtista'];
                     $obra->tecnica = $data['tecnica'];
                     $obra->nombre = $data['nombre'];
@@ -139,33 +143,46 @@ class ObraController
                     $obra->fechaRegistro = $data['fechaRegistro'];
                     $obra->save();
 
+                    $obra = Obra::find($obra->id);
+
+                    DB::commit();
+
                     $response = [
                         'status' => 201,
                         'message' => 'Obra guardada exitosamente',
                         'obra' => $obra
                     ];
-                } else {
+                } catch (\Exception $e) {
+                    DB::rollBack();
                     $response = [
-                        'status' => 406,
-                        'message' => 'Error: verifica rellenar todos los datos',
-                        'error' => $isValid->errors(),
+                        'status' => 500,
+                        'message' => 'Error al guardar la obra',
+                        'error' => $e->getMessage(),
                     ];
                 }
             } else {
                 $response = [
-                    'status' => 400,
-                    'message' => 'No se encontraron todos los datos necesarios'
+                    'status' => 406,
+                    'message' => 'Error: verifica rellenar todos los datos',
+                    'error' => $isValid->errors(),
                 ];
             }
         } else {
-            $response = array(
-                'status' => 406,
-                'menssage' => 'No tienes permiso de administrador'
-            );
-
+            $response = [
+                'status' => 400,
+                'message' => 'No se encontraron todos los datos necesarios'
+            ];
         }
-        return response()->json($response, $response['status']);
+    } else {
+        $response = [
+            'status' => 406,
+            'message' => 'No tienes permiso de administrador'
+        ];
     }
+
+    return response()->json($response, $response['status']);
+}
+
 
     public function destroy(Request $request, $id)
     {
