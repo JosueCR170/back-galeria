@@ -112,28 +112,61 @@ class UserController
     public function destroy(Request $request, $id)
     {
         $jwt = new JwtAuth();
+
         if ($jwt->checkToken($request->header('bearertoken'), true)->tipoUsuario) {
             if (isset($id)) {
-                DB::statement('EXEC paEliminarUsuario ?', [$id]);
-                $response = array(
-                    'status' => 200,
-                    'message' => 'Usuario eliminado'
-                );
+                try {
+                    DB::beginTransaction();
+
+                    DB::statement('EXEC paEliminarUsuario ?', [$id]);
+                    $userStillExists = DB::table('users')->where('id', $id)->exists();
+
+                    if ($userStillExists) {
+                        throw new \Exception('The user could not be deleted due to foreign key restrictions or other errors');
+                    }
+
+                    DB::commit();
+
+                    $response = [
+                        'status' => 200,
+                        'message' => 'Usuario eliminado correctamente'
+                    ];
+
+                } catch (\Illuminate\Database\QueryException $e) {
+                    DB::rollBack();
+
+                    $sqlErrorMessage = isset($e->errorInfo[2]) ? $e->errorInfo[2] : $e->getMessage();
+
+                    $response = [
+                        'status' => 500,
+                        'message' => 'Error al ejecutar el procedimiento de eliminación',
+                        'error' => $sqlErrorMessage
+                    ];
+                } catch (\Exception $e) {
+                    DB::rollBack();
+
+                    $response = [
+                        'status' => 500,
+                        'message' => 'Error al eliminar el usuario',
+                        'error' => $e->getMessage()
+                    ];
+                }
             } else {
-                $response = array(
+                $response = [
                     'status' => 406,
                     'message' => 'Falta el identificador del recurso a eliminar'
-                );
+                ];
             }
         } else {
-            $response = array(
-                'status' => 406,
-                'menssage' => 'No tienes permiso de administrador'
-
-            );
+            $response = [
+                'status' => 403,
+                'message' => 'No tienes permiso de administrador'
+            ];
         }
+
         return response()->json($response, $response['status']);
     }
+    
 
     public function update(Request $request, $id)
     {
