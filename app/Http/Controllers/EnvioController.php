@@ -261,8 +261,8 @@ class EnvioController
 
             $response = [
                 'status' => 201,
-                'message' => 'Envio actualizada',
-                'Factura' => $envio
+                'message' => 'Envio actualizado',
+                'Envio' => $envio
             ];
         } else {
             $response = array(
