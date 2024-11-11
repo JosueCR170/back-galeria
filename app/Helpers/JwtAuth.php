@@ -50,7 +50,7 @@ class JwtAuth
                 'correo'=>$artista->correo,
                 'nombreArtista'=>$artista->nombreArtista,
                 'iat'=>time(),
-                'exp'=>time()+(10000)
+                'exp'=>time()+(10000) //10000
             );
             $data=JWT::encode($token,$this->key,'HS256');
         }else{

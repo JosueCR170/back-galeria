@@ -16,6 +16,8 @@ use App\Http\Middleware\ApiAuthMiddleware;
 
 Route::prefix('v1')->group(
     function(){
+
+        Route::get('/verifyToken',[UserController::class,'verifyToken']);
         //user
         Route::post('/user/store',[UserController::class,'store']);//-
         Route::post('/user/login',[UserController::class,'login']);//-
